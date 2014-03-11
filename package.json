@@ -1,0 +1,29 @@
+{
+  "name": "DavidLeeBot-plug",
+  "version": "0.0.1",
+  "description": "David Lee Bot, a plug.dj bot",
+  "main": "dlb.js",
+  "dependencies": {
+    "plugapi": "~1.1.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ronaldb/DavidLeeBot-plug.git"
+  },
+  "keywords": [
+    "heroku",
+    "bot",
+    "plug.dj",
+    "nodejs"
+  ],
+  "author": "Ronald Bruintjes",
+  "license": "GPL v2",
+  "bugs": {
+    "url": "https://github.com/ronaldb/DavidLeeBot-plug/issues"
+  },
+  "homepage": "https://github.com/ronaldb/DavidLeeBot-plug"
+}
