@@ -31,7 +31,13 @@ function initializeModules () {
         process.exit(33);
     }
 
-    bot = new PlugAPI(config.botinfo.auth);
+    if (config.server == 'local') {
+	    bot = new PlugAPI(config.botinfo.auth);
+    }
+    else if (config.server == 'heroku') {
+    	bot = new PlugAPI(process.env.DLBAUTH);
+    }
+
     bot.connect(config.roomid);
 }
 
