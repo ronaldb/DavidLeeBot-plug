@@ -1,4 +1,5 @@
-{"botinfo":
-	{"auth":"46xH8jZeK9zn6+80RtBWDvXJV/U=?_expires=STE0MDk5NjgyODIKLg==&user_id=Uyc1MmM4MzY4ZmMzYjk3YTA2YjFlODgwMTgnCnAxCi4=&v=STIKLg==",
+{"server":"heroku",
+"botinfo":
+	{"auth":"heroku",
 	"botname":"David Lee Bot"},
 "roomid":"better-off-80-s"}
