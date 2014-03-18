@@ -79,6 +79,7 @@ PlugAPI.getAuth({
                 bot.chat("Well hey there! @"+data.from);
                 break;
             case ".woot": //Makes the bot cast an upvote
+            case ".dance":
                 bot.woot();
                 bot.chat("I can dig it!");
                 break;
