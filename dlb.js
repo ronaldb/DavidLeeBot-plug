@@ -155,20 +155,6 @@ PlugAPI.getAuth({
         qualifier=qualifier.replace(/&gt;/gi, '\>');
         switch (command)
         {
-            case ".hey": //Makes the bot greet the user 
-            case ".yo":
-            case ".hi":
-            case ".hello":
-                bot.chat("Well hey there! @"+data.from);
-                break;
-            case ".woot": //Makes the bot cast an upvote
-                bot.woot();
-                bot.chat("I can dig it!");
-                break;
-            case ".meh": //Makes the bot cast a downvote
-                bot.meh();
-                bot.chat("Please... make it stop :unamused:");
-                break;
             default:
                 handleCommand(command, qualifier, data.from, data.fromID, "chat");
                 break;
