@@ -6,8 +6,27 @@ var args = process.argv;
 
 global.fs = require('fs');
 global.events = require('./events.js');
+global.commands = new Array();
 
 global.config;
+global.bot;
+
+//Format: output({text: [required], destination: [required],
+//                userid: [required for PM], format: [optional]});
+global.output = function(data) {
+    if(data.destination == 'chat') {
+        bot.chat(data.text);
+    } else if(data.destination == 'pm') {
+        bot.pm(data.text, data.userid);
+    } else if(data.destination == 'http') {
+        response.writeHead(200, {'Content-Type':'text/plain'});
+        if(data.format == 'json') {
+            response.end(JSON.stringify(data.text));
+        } else {
+            response.end(data.text);
+        }
+    }
+}
 
 function initializeModules () {
     //Creates the config object
@@ -23,6 +42,73 @@ function initializeModules () {
         console.log('Error loading config.json. Check that your config file exists and is valid JSON.');
         process.exit(33);
     }
+
+    loadCommands(null);
+}
+
+//Loads or reloads commands
+function loadCommands (data) {
+    var newCommands = new Array();
+    var j = 0;
+    var response = '';
+
+    try {
+        var filenames = fs.readdirSync('./commands');
+        var copyFound = false;
+        
+        for (i in filenames) {
+            var command = require('./commands/' + filenames[i]);
+            newCommands.push({name: command.name, copies: command.copies, handler: command.handler,
+                hidden: command.hidden, enabled: command.enabled, matchStart: command.matchStart});
+            j++;
+        }
+        // Handle commands that copy other commands
+        for (copyCommand in newCommands) {
+            if (newCommands[copyCommand].copies != null) {
+                copyFound = false;
+                for (originalCommand in newCommands) {
+                    if (newCommands[originalCommand].name == newCommands[copyCommand].copies) {
+                        copyFound = true;
+                        newCommands[copyCommand].handler = newCommands[originalCommand].handler;
+                    }
+                }
+                if (copyFound == false) {
+                    response = 'Copy command "' + newCommands[copyCommand].copies + '" for "' + newCommands[copyCommand].name + '" not found';
+                    if (data == null) {
+                        console.log(response);
+                    }
+                    else {
+                        output({text: response, destination: data.source, userid: data.userid});
+                    }
+                }
+            }
+        }
+        commands = newCommands;
+        response = j + ' commands loaded.';
+        if (data == null) {
+            console.log(response);
+        }
+        else {
+            output({text: response, destination: data.source, userid: data.userid});
+        }
+    } catch (e) {
+        response = 'Command reload failed: ' + e;
+        if (data == null) {
+            console.log(response);
+        }
+        else {
+            output({text: response, destination: data.source, userid: data.userid});
+        }
+    }
+}
+
+function handleCommand (command, text, name, userid, source) {
+    for (i in commands) {
+        if (commands[i].name == command) {
+            commands[i].handler({name: name, userid: userid, text: text, source: source});
+            break;
+        }
+    }
 }
 
 initializeModules();
@@ -36,7 +122,7 @@ PlugAPI.getAuth({
         console.log("An error occurred: " + err);
         return;
     }
-    var bot = new PlugAPI(auth, UPDATECODE);
+    bot = new PlugAPI(auth, UPDATECODE);
     bot.connect(config.roomid);
 
     //Event which triggers when the bot joins the room
@@ -69,23 +155,8 @@ PlugAPI.getAuth({
         qualifier=qualifier.replace(/&gt;/gi, '\>');
         switch (command)
         {
-            case ".commands": //Returns a list of the most important commands
-                bot.chat("List of Commands: .about, .album, .artist, .calc, .define, .events, .facebook, .forecast, .genre, .google, .github, .props, .similar, .soundcloud, .track, .translate, .wiki, and .woot");
-                break;
-            case ".hey": //Makes the bot greet the user 
-            case ".yo":
-            case ".hi":
-            case ".hello":
-                bot.chat("Well hey there! @"+data.from);
-                break;
-            case ".woot": //Makes the bot cast an upvote
-            case ".dance":
-                bot.woot();
-                bot.chat("I can dig it!");
-                break;
-            case ".meh": //Makes the bot cast a downvote
-                bot.meh();
-                bot.chat("Please... make it stop :unamused:");
+            default:
+                handleCommand(command, qualifier, data.from, data.fromID, "chat");
                 break;
         }
     });
