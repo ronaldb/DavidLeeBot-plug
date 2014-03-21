@@ -8,6 +8,6 @@ exports.handler = function(data) {
     var response = 'Commands: ' + commands.filter(function(command) {
         return command.enabled && !command.hidden;
     }).map(function(command){return command.name;}).sort().join(', ');
-    bot.chat(response);
-//    output({text: response, destination: data.source, userid: data.userid});
+//    bot.chat(response);
+    output({text: response, destination: data.source, userid: data.userid});
 }

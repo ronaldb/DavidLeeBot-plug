@@ -11,6 +11,23 @@ global.commands = new Array();
 global.config;
 global.bot;
 
+//Format: output({text: [required], destination: [required],
+//                userid: [required for PM], format: [optional]});
+global.output = function(data) {
+    if(data.destination == 'chat') {
+        bot.chat(data.text);
+    } else if(data.destination == 'pm') {
+        bot.pm(data.text, data.userid);
+    } else if(data.destination == 'http') {
+        response.writeHead(200, {'Content-Type':'text/plain'});
+        if(data.format == 'json') {
+            response.end(JSON.stringify(data.text));
+        } else {
+            response.end(data.text);
+        }
+    }
+}
+
 function initializeModules () {
     //Creates the config object
     try {
