@@ -9,6 +9,7 @@ global.events = require('./events.js');
 global.commands = new Array();
 
 global.config;
+global.bot;
 
 function initializeModules () {
     //Creates the config object
@@ -84,6 +85,15 @@ function loadCommands (data) {
     }
 }
 
+function handleCommand (command, text, name, userid, source) {
+    for (i in commands) {
+        if (commands[i].name == command) {
+            commands[i].handler({name: name, userid: userid, text: text, source: source});
+            break;
+        }
+    }
+}
+
 initializeModules();
 
 // Instead of providing the AUTH, you can use this static method to get the AUTH cookie via twitter login credentials:
@@ -95,7 +105,7 @@ PlugAPI.getAuth({
         console.log("An error occurred: " + err);
         return;
     }
-    var bot = new PlugAPI(auth, UPDATECODE);
+    bot = new PlugAPI(auth, UPDATECODE);
     bot.connect(config.roomid);
 
     //Event which triggers when the bot joins the room
@@ -128,9 +138,6 @@ PlugAPI.getAuth({
         qualifier=qualifier.replace(/&gt;/gi, '\>');
         switch (command)
         {
-            case ".commands": //Returns a list of the most important commands
-                bot.chat("List of Commands: .about, .album, .artist, .calc, .define, .events, .facebook, .forecast, .genre, .google, .github, .props, .similar, .soundcloud, .track, .translate, .wiki, and .woot");
-                break;
             case ".hey": //Makes the bot greet the user 
             case ".yo":
             case ".hi":
@@ -144,6 +151,9 @@ PlugAPI.getAuth({
             case ".meh": //Makes the bot cast a downvote
                 bot.meh();
                 bot.chat("Please... make it stop :unamused:");
+                break;
+            default:
+                handleCommand(command, qualifier, data.from, data.fromID, "chat");
                 break;
         }
     });
