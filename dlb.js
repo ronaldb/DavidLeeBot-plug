@@ -11,6 +11,18 @@ global.commands = new Array();
 global.config;
 global.bot;
 
+global.currentsong = {
+    artist:   null,
+    song:     null,
+    djname:   null,
+    djid:     null,
+    up:       0,
+    down:     0,
+    listeners:0,
+    snags:    0,
+    id:       null    
+}
+
 //Format: output({text: [required], destination: [required],
 //                userid: [required for PM], format: [optional]});
 global.output = function(data) {
@@ -26,6 +38,19 @@ global.output = function(data) {
             response.end(data.text);
         }
     }
+}
+
+global.populateSongData = function(data) {
+    //currentsong = data.room.metadata.current_song;
+    currentsong.artist = data.media.author;
+    currentsong.song   = data.media.title;
+    currentsong.id     = data.media.cid;
+    currentsong.djid   = data.currentDJ;
+    //currentsong.up = data.room.metadata.upvotes;
+    //currentsong.down = data.room.metadata.downvotes;
+    //currentsong.listeners = data.room.metadata.listeners;
+    //currentsong.started = data.room.metadata.current_song.starttime;
+    currentsong.snags = 0;
 }
 
 function initializeModules () {
@@ -128,6 +153,7 @@ PlugAPI.getAuth({
     //Event which triggers when the bot joins the room
     bot.on('roomJoin', function(data) {
         console.log("I'm alive!");
+        populateSongData(data.room);
     });
 
     //Events which trigger to reconnect the bot when an error occurs
