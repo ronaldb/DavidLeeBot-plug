@@ -1,5 +1,8 @@
 exports.onCurateUpdate = function(data) {
-	console.log("curateUpdate:", data);
+	if (config.debugmode) {
+		console.log("curateUpdate:", data);
+	};
+	currentsong.snags += 1; // Assuming you can only grab once...
 }
 
 exports.onDjAdvance = function(data) {
@@ -10,35 +13,80 @@ exports.onDjAdvance = function(data) {
     var endsongresponse = ':musical_note: ' + currentsong.song + ' stats: '
         + currentsong.up + woots + currentsong.down
         + mehs + currentsong.snags + snags;	
-    bot.chat(endsongresponse);
+    if (currentsong.song !== null) {
+	    bot.chat(endsongresponse);
+    }
 
-	console.log("djAdvance:", data);
-	if (data !== null) {
-		console.log("djAdvance-djs:", data.djs);
-	}
+    if (config.debugmode) {
+		console.log("djAdvance:", data);
+		if (data !== null) {
+			console.log("djAdvance-djs:", data.djs);
+		}
+    }
+
 	populateSongData(data);
 }
 
 exports.onDjUpdate = function(data) {
-	console.log("djUpdate:", data);
+	if (config.debugmode) {
+		console.log("djUpdate:", data);
+	};
 }
 
 exports.onEmote = function(data) {
-	console.log("emote:", data);
+	if (config.debugmode) {
+		console.log("emote:", data);
+	};
 }
 
 exports.onUserJoin = function(data) {
-	console.log("userJoin:", data);
+	if (config.debugmode) {
+		console.log("userJoin:", data);
+	}
 }
 
 exports.onUserLeave = function(data) {
-	console.log("userLeave:", data);
+	if (config.debugmode) {
+		console.log("userLeave:", data);
+	};
 }
 
 exports.onUserUpdate = function(data) {
-	console.log("userUpdate:", data);
+	if (config.debugmode) {
+		console.log("userUpdate:", data);
+	};
 }
 
 exports.onVoteUpdate = function(data) {
-	console.log("voteUpdate:", data);
+	if (config.debugmode) {
+		console.log("voteUpdate:", data);
+		console.log("DJ", data.id, " made ", (data.vote == 1 ? "up" : "down"), " vote");
+	}
+
+	if (data.vote == 1) {
+		// If this is an upvote, remove from downvoters (if there) and add to upvoters
+		if (downvoters.indexOf(data.id) !== -1) {
+			downvoters.splice(downvoters.indexOf(data.id),1);
+		}
+		if (upvoters.indexOf(data.id) == -1) {
+			upvoters.push(data.id);
+		}
+	}
+	else {
+		// downvote, remove from upvoters and add to downvoters
+		if (upvoters.indexOf(data.id) !== -1) {
+			upvoters.splice(upvoters.indexOf(data.id),1);
+		}
+		if (downvoters.indexOf(data.id) == -1) {
+			downvoters.push(data.id);
+		}
+	}
+
+	currentsong.up = upvoters.length;
+	currentsong.down = downvoters.length;
+
+	if (config.debugmode) {
+		console.log("Upvoters",upvoters);
+		console.log("Downvoters",downvoters);
+	}
 }

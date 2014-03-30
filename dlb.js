@@ -7,6 +7,8 @@ var args = process.argv;
 global.fs = require('fs');
 global.events = require('./events.js');
 global.commands = new Array();
+global.upvoters = new Array();
+global.downvoters = new Array();
 
 global.config;
 global.bot;
@@ -41,16 +43,24 @@ global.output = function(data) {
 }
 
 global.populateSongData = function(data) {
+    currentsong.snags  = 0;
+    currentsong.artist = null;
+    currentsong.song   = null;
+    currentsong.id     = null;
+    currentsong.djid   = null;
+    if (data !== null) {
+        currentsong.djid   = data.currentDJ;
+        if (data.media !== null) {
+            currentsong.artist = data.media.author;
+            currentsong.song   = data.media.title;
+            currentsong.id     = data.media.cid;
+        }
+    }
     //currentsong = data.room.metadata.current_song;
-    currentsong.artist = data.media.author;
-    currentsong.song   = data.media.title;
-    currentsong.id     = data.media.cid;
-    currentsong.djid   = data.currentDJ;
     //currentsong.up = data.room.metadata.upvotes;
     //currentsong.down = data.room.metadata.downvotes;
     //currentsong.listeners = data.room.metadata.listeners;
     //currentsong.started = data.room.metadata.current_song.starttime;
-    currentsong.snags = 0;
 }
 
 function initializeModules () {
@@ -166,7 +176,9 @@ PlugAPI.getAuth({
 
     //Event which triggers when anyone chats
     bot.on('chat', function(data) {
-        console.log('chat:', data);
+        if (config.debugmode) {
+            console.log('chat:', data);
+        }
 
         var command=data.message.split(' ')[0];
         var firstIndex=data.message.indexOf(' ');
