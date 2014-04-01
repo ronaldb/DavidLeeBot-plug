@@ -7,8 +7,6 @@ var args = process.argv;
 global.fs = require('fs');
 global.events = require('./events.js');
 global.commands = new Array();
-global.upvoters = new Array();
-global.downvoters = new Array();
 
 global.config;
 global.bot;
@@ -43,7 +41,8 @@ global.output = function(data) {
 }
 
 global.populateSongData = function(data) {
-    currentsong.snags  = 0;
+    var roomScore = bot.getRoomScore();
+
     currentsong.artist = null;
     currentsong.song   = null;
     currentsong.id     = null;
@@ -56,9 +55,12 @@ global.populateSongData = function(data) {
             currentsong.id     = data.media.cid;
         }
     }
+
+    currentsong.snags = roomScore.curates;
+    currentsong.up    = roomScore.positive;
+    currentsong.down  = roomScore.negative;
+
     //currentsong = data.room.metadata.current_song;
-    //currentsong.up = data.room.metadata.upvotes;
-    //currentsong.down = data.room.metadata.downvotes;
     //currentsong.listeners = data.room.metadata.listeners;
     //currentsong.started = data.room.metadata.current_song.starttime;
 }

@@ -58,35 +58,14 @@ exports.onUserUpdate = function(data) {
 }
 
 exports.onVoteUpdate = function(data) {
+	var roomScore = bot.getRoomScore();
+
 	if (config.debugmode) {
 		console.log("voteUpdate:", data);
 		console.log("DJ", data.id, " made ", (data.vote == 1 ? "up" : "down"), " vote");
 	}
 
-	if (data.vote == 1) {
-		// If this is an upvote, remove from downvoters (if there) and add to upvoters
-		if (downvoters.indexOf(data.id) !== -1) {
-			downvoters.splice(downvoters.indexOf(data.id),1);
-		}
-		if (upvoters.indexOf(data.id) == -1) {
-			upvoters.push(data.id);
-		}
-	}
-	else {
-		// downvote, remove from upvoters and add to downvoters
-		if (upvoters.indexOf(data.id) !== -1) {
-			upvoters.splice(upvoters.indexOf(data.id),1);
-		}
-		if (downvoters.indexOf(data.id) == -1) {
-			downvoters.push(data.id);
-		}
-	}
-
-	currentsong.up = upvoters.length;
-	currentsong.down = downvoters.length;
-
-	if (config.debugmode) {
-		console.log("Upvoters",upvoters);
-		console.log("Downvoters",downvoters);
-	}
+	currentsong.up = roomScore.positive;
+	currentsong.down = roomScore.negative;
+	currentsong.snags = roomScore.curates;
 }
