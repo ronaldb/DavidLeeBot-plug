@@ -195,6 +195,45 @@ PlugAPI.getAuth({
         qualifier=qualifier.replace(/&gt;/gi, '\>');
         switch (command)
         {
+            case '#shutdown':
+                // Gracefully logoff and exit with 0 to stop bot
+                if (data.fromID == config.admin) {
+                    bot.leaveBooth();
+                    bot.chat("Shutting down...");
+                    setTimeout(function() {
+                        process.exit(0);
+                    }, 5000);
+                }
+                else {
+                    bot.chat("I don't think so, " + data.from + "...");
+                }
+                break;
+            case '#restart':
+                // Gracefully logoff and exit with 34 to restart
+                if (data.fromID == config.admin) {
+                    bot.leaveBooth();
+                    bot.chat("Restarting...");
+                    setTimeout(function() {
+                        process.exit(34);
+                    }, 5000);
+                }
+                else {
+                    bot.chat("I don't think so, " + data.from + "...");
+                }
+                break;
+            case '#comebacklater':
+                // Gracefully logoff and exit with 35 to come back after 10 minutes
+                if (data.fromID == config.admin) {
+                    bot.leaveBooth();
+                    bot.chat("I'll be back later!");
+                    setTimeout(function() {
+                        process.exit(35);
+                    }, 5000);
+                }
+                else {
+                    bot.chat("I don't think so, " + data.from + "...");
+                }
+                break;
             default:
                 handleCommand(command, qualifier, data.from, data.fromID, "chat");
                 break;
