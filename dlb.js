@@ -182,7 +182,7 @@ PlugAPI.getAuth({
             console.log('chat:', data);
         }
 
-        var command=data.message.split(' ')[0];
+        var command=data.message.split(' ')[0].toLowerCase();
         var firstIndex=data.message.indexOf(' ');
         var qualifier="";
         if (firstIndex!=-1){
