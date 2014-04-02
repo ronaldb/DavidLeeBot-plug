@@ -6,7 +6,10 @@ exports.enabled = true;
 exports.matchStart = false;
 exports.handler = function(data) {
     var response = 'I can dig it!';
-    if (data.userid == currentsong.djid) {
+    if (currentsong.song == null) {
+    	response = "There's nothing playing!";
+    }
+    else if (data.userid == currentsong.djid) {
     	response = "You can't woot for yourself!";
     }
     else {
