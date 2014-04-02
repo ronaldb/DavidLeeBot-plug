@@ -7,6 +7,7 @@ var args = process.argv;
 global.fs = require('fs');
 global.events = require('./events.js');
 global.commands = new Array();
+global.moderators = new Array();
 
 global.config;
 global.bot;
@@ -63,6 +64,15 @@ global.populateSongData = function(data) {
     //currentsong = data.room.metadata.current_song;
     //currentsong.listeners = data.room.metadata.listeners;
     //currentsong.started = data.room.metadata.current_song.starttime;
+}
+
+//Checks if the user id is present in the admin list. Authentication
+//for admin-only privileges.
+global.admincheck = function(userid) {
+    return (userid === config.admin ||
+        moderators.some(function(moderatorid) {
+            return moderatorid === userid;
+        }));
 }
 
 function initializeModules () {
@@ -166,6 +176,14 @@ PlugAPI.getAuth({
     bot.on('roomJoin', function(data) {
         console.log("I'm alive!");
         populateSongData(data.room);
+        
+        // Create list of moderators (admins)
+        var Staff = bot.getStaff();
+        for (var i = Staff.length - 1; i >= 0; i--) {
+            if (Staff[i].permission >= config.adminPermission) {
+                moderators.push(Staff[i].id);
+            }
+        };
     });
 
     //Events which trigger to reconnect the bot when an error occurs
