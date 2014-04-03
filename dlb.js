@@ -21,6 +21,8 @@ global.currentsong = {
     down:     0,
     listeners:0,
     snags:    0,
+    wooted:   false,
+    mehed:    false,
     id:       null    
 }
 
@@ -48,6 +50,8 @@ global.populateSongData = function(data) {
     currentsong.song   = null;
     currentsong.id     = null;
     currentsong.djid   = null;
+    currentsong.wooted = false;
+    currentsong.mehed  = false;
     if (data !== null) {
         currentsong.djid   = data.currentDJ;
         if (data.media !== null) {
@@ -176,7 +180,7 @@ PlugAPI.getAuth({
     bot.on('roomJoin', function(data) {
         console.log("I'm alive!");
         populateSongData(data.room);
-        
+
         // Create list of moderators (admins)
         var Staff = bot.getStaff();
         for (var i = Staff.length - 1; i >= 0; i--) {

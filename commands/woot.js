@@ -12,7 +12,12 @@ exports.handler = function(data) {
     else if (data.userid == currentsong.djid) {
     	response = "You can't woot for yourself!";
     }
+    else if (currentsong.wooted) {
+        response = "I can't woot any louder!";
+    }
     else {
+        currentsong.wooted = true;
+        currentsong.mehed  = false;
 	    bot.woot();
     }
     output({text: response, destination: data.source, userid: data.userid});
