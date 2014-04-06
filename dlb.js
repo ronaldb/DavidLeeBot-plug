@@ -133,6 +133,79 @@ function initializeModules () {
     loadCommands(null);
 }
 
+//Sets up the database
+global.setUpDatabase = function() {
+    //song table
+    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.song
+        + '(id INT(11) AUTO_INCREMENT PRIMARY KEY,'
+        + ' artist VARCHAR(255),'
+        + ' song VARCHAR(255),'
+        + ' djid VARCHAR(255),'
+        + ' songid VARCHAR(255),'
+        + ' woot INT(3),' + ' meh INT(3),'
+        + ' listeners INT(3),'
+        + ' started DATETIME,'
+        + ' grabs INT(3))')
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('Song table added successfully');
+            });
+        });
+
+    //chat table
+    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.chat
+        + '(id INT(11) AUTO_INCREMENT PRIMARY KEY,'
+        + ' userid VARCHAR(255),'
+        + ' chat VARCHAR(255),'
+        + ' time DATETIME)')
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('Chat table added successfully');
+            });
+        });
+
+    //user table
+    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.user
+        + '(userid VARCHAR(255), '
+        + 'username VARCHAR(255), '
+        + 'lastseen DATETIME, '
+        + 'PRIMARY KEY (userid, username))')
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('User table added successfully');
+            });
+        });
+
+    //banned table
+    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.banned
+        + '(id INT(11) AUTO_INCREMENT PRIMARY KEY, '
+        + 'userid VARCHAR(255), '
+        + 'banned_by VARCHAR(255), '
+        + 'timestamp DATETIME)')
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('Banned table added successfully');
+            });
+        });
+}
+
+
 //Loads or reloads commands
 function loadCommands (data) {
     var newCommands = new Array();
@@ -224,7 +297,8 @@ PlugAPI.getAuth({
                 moderators.push(Staff[i].id);
             }
         };
-        bot.chat("Hello, world!");
+        events.readyEventHandler();
+//        bot.chat("Hello, world!");
     });
 
     //Events which trigger to reconnect the bot when an error occurs

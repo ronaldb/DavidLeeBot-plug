@@ -1,3 +1,12 @@
+exports.readyEventHandler = function (data) {
+    if (config.database.usedb) {
+        setUpDatabase();
+    }
+
+//	loop();
+
+}
+
 exports.onCurateUpdate = function(data) {
 	if (config.debugmode) {
 		console.log("curateUpdate:", data);
