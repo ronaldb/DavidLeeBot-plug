@@ -12,7 +12,8 @@
 	"tablenames":
 		{"song": "SONGLIST", 
 		"chat": "CHATLOG", 
-		"user": "USERS", 
+		"user": "USERS",
+		"banned": "BANNED",
 		"holiday": "HOLIDAY_GREETINGS"},
 	"login":{
 		"user":"TheUser",
