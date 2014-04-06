@@ -22,7 +22,12 @@ exports.onDjAdvance = function(data) {
     var endsongresponse = ':musical_note: ' + currentsong.song + ' stats: '
         + currentsong.up + woots + currentsong.down
         + mehs + currentsong.snags + snags;	
+       
     if (currentsong.song !== null) {
+	    //Log song in DB
+	    if (config.database.usedb) {
+	        addToDb();
+	    }
 	    bot.chat(endsongresponse);
     }
 

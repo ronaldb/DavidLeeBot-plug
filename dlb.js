@@ -5,6 +5,7 @@ var UPDATECODE = 'h90';
 var args = process.argv;
 
 global.fs = require('fs');
+global.inspect = require('util').inspect;
 global.events = require('./events.js');
 global.myutils = require('./myutils.js');
 global.commands = new Array();
@@ -205,6 +206,31 @@ global.setUpDatabase = function() {
         });
 }
 
+//Adds the song data to the songdata table.
+//This runs on the endsong event.
+global.addToDb = function(data) {
+    dbclient.query(
+        'INSERT INTO ' + config.database.dbname + '.' + config.database.tablenames.song + ' '
+            + 'SET artist = ?,song = ?, songid = ?, djid = ?, woot = ?, meh = ?,'
+            + 'listeners = ?, started = NOW(), grabs = ?',
+        [currentsong.artist,
+            currentsong.song,
+            currentsong.id,
+            currentsong.djid,
+            currentsong.up,
+            currentsong.down,
+            currentsong.listeners,
+            currentsong.snags])
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('Song record added successfully');
+            });
+        });
+}
 
 //Loads or reloads commands
 function loadCommands (data) {
