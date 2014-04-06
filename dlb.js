@@ -6,6 +6,7 @@ var args = process.argv;
 
 global.fs = require('fs');
 global.events = require('./events.js');
+global.myutils = require('./myutils.js');
 global.commands = new Array();
 global.moderators = new Array();
 

@@ -11,7 +11,7 @@ exports.handler = function(data) {
                      ":notes: :notes: I can hear this song in my sleep.",
                      "Love this!",
                      "Rock on!"];
-    var response = responses[Math.floor(Math.random() * responses.length)];
+    var response = myutils.pickone(responses);
     if (currentsong.song == null) {
     	response = "There's nothing playing!";
     }
