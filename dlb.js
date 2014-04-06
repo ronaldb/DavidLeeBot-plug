@@ -189,6 +189,7 @@ PlugAPI.getAuth({
                 moderators.push(Staff[i].id);
             }
         };
+        bot.chat("Hello, world!");
     });
 
     //Events which trigger to reconnect the bot when an error occurs
