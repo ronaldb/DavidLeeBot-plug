@@ -12,6 +12,7 @@ global.moderators = new Array();
 
 global.config;
 global.bot;
+global.dbclient;
 
 global.currentsong = {
     artist:   null,
@@ -93,6 +94,40 @@ function initializeModules () {
         console.log(e);
         console.log('Error loading config.json. Check that your config file exists and is valid JSON.');
         process.exit(33);
+    }
+
+    //Creates mariasql db object
+    if (config.database.usedb) {
+        try {
+            mariasql = require('mariasql');
+        } catch(e) {
+            console.log(e);
+            console.log('It is likely that you do not have the mariadb node module installed.'
+                + '\nUse the command \'npm install mariasql\' to install.');
+            console.log('Starting bot without database functionality.');
+            config.database.usedb = false;
+        }
+    }
+
+    if (config.database.usedb) {
+        //Connects to mariasql server
+        try {
+            var dbhost = 'localhost';
+            if (config.database.login.host != null && config.database.login.host != '') {
+                dbhost = config.database.login.host;
+            }
+            dbclient = new mariasql();
+            dbclient.connect({user: config.database.login.user,
+                              password: config.database.login.password,
+                              database: config.database.dbname,
+                              host: dbhost});
+        } catch(e) {
+            console.log(e);
+            console.log('Make sure that a MariaDB server instance is running and that the '
+                + 'username and password information in config.js are correct.');
+            console.log('Starting bot without database functionality.');
+            config.database.usedb = false;
+        }
     }
 
     loadCommands(null);
