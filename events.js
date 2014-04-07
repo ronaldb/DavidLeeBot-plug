@@ -32,10 +32,7 @@ exports.onDjAdvance = function(data) {
     }
 
     if (config.debugmode) {
-		console.log("djAdvance:", data);
-		if (data !== null) {
-			console.log("djAdvance-djs:", data.djs);
-		}
+		console.log("djAdvance:", inspect(data, {depth: null}));
     }
 
 	populateSongData(data);

@@ -48,6 +48,7 @@ global.output = function(data) {
 
 global.populateSongData = function(data) {
     var roomScore = bot.getRoomScore();
+    var roomUsers = bot.getUsers();
 
     currentsong.artist = null;
     currentsong.song   = null;
@@ -67,9 +68,9 @@ global.populateSongData = function(data) {
     currentsong.snags = roomScore.curates;
     currentsong.up    = roomScore.positive;
     currentsong.down  = roomScore.negative;
+    currentsong.listeners = roomUsers.length;
 
     //currentsong = data.room.metadata.current_song;
-    //currentsong.listeners = data.room.metadata.listeners;
     //currentsong.started = data.room.metadata.current_song.starttime;
 }
 
