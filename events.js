@@ -54,6 +54,24 @@ exports.onUserJoin = function(data) {
 	if (config.debugmode) {
 		console.log("userJoin:", data);
 	}
+
+    //Add user to user table
+    if (config.database.usedb) {
+        dbclient.query('INSERT INTO ' + config.database.dbname + '.' + config.database.tablenames.user
+        + ' (userid, username, lastseen)'
+            + 'VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE lastseen = NOW()',
+            [data.id, data.username])
+        .on('result', function(res) {
+        	res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('User record added successfully');
+            });
+        });
+    }
+
 }
 
 exports.onUserLeave = function(data) {

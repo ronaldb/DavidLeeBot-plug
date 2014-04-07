@@ -69,8 +69,6 @@ global.populateSongData = function(data) {
     currentsong.up    = roomScore.positive;
     currentsong.down  = roomScore.negative;
     currentsong.listeners = roomUsers.length;
-
-    //currentsong = data.room.metadata.current_song;
     //currentsong.started = data.room.metadata.current_song.starttime;
 }
 
