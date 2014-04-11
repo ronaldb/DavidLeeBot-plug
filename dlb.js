@@ -5,6 +5,7 @@ var UPDATECODE = 'h90';
 var args = process.argv;
 
 global.fs = require('fs');
+global.inspect = require('util').inspect;
 global.events = require('./events.js');
 global.myutils = require('./myutils.js');
 global.commands = new Array();
@@ -12,6 +13,7 @@ global.moderators = new Array();
 
 global.config;
 global.bot;
+global.dbclient;
 
 global.currentsong = {
     artist:   null,
@@ -46,6 +48,7 @@ global.output = function(data) {
 
 global.populateSongData = function(data) {
     var roomScore = bot.getRoomScore();
+    var roomUsers = bot.getUsers();
 
     currentsong.artist = null;
     currentsong.song   = null;
@@ -65,9 +68,7 @@ global.populateSongData = function(data) {
     currentsong.snags = roomScore.curates;
     currentsong.up    = roomScore.positive;
     currentsong.down  = roomScore.negative;
-
-    //currentsong = data.room.metadata.current_song;
-    //currentsong.listeners = data.room.metadata.listeners;
+    currentsong.listeners = roomUsers.length;
     //currentsong.started = data.room.metadata.current_song.starttime;
 }
 
@@ -95,7 +96,139 @@ function initializeModules () {
         process.exit(33);
     }
 
+    //Creates mariasql db object
+    if (config.database.usedb) {
+        try {
+            mariasql = require('mariasql');
+        } catch(e) {
+            console.log(e);
+            console.log('It is likely that you do not have the mariadb node module installed.'
+                + '\nUse the command \'npm install mariasql\' to install.');
+            console.log('Starting bot without database functionality.');
+            config.database.usedb = false;
+        }
+    }
+
+    if (config.database.usedb) {
+        //Connects to mariasql server
+        try {
+            var dbhost = 'localhost';
+            if (config.database.login.host != null && config.database.login.host != '') {
+                dbhost = config.database.login.host;
+            }
+            dbclient = new mariasql();
+            dbclient.connect({user: config.database.login.user,
+                              password: config.database.login.password,
+                              database: config.database.dbname,
+                              host: dbhost});
+        } catch(e) {
+            console.log(e);
+            console.log('Make sure that a MariaDB server instance is running and that the '
+                + 'username and password information in config.js are correct.');
+            console.log('Starting bot without database functionality.');
+            config.database.usedb = false;
+        }
+    }
+
     loadCommands(null);
+}
+
+//Sets up the database
+global.setUpDatabase = function() {
+    //song table
+    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.song
+        + '(id INT(11) AUTO_INCREMENT PRIMARY KEY,'
+        + ' artist VARCHAR(255),'
+        + ' song VARCHAR(255),'
+        + ' djid VARCHAR(255),'
+        + ' songid VARCHAR(255),'
+        + ' woot INT(3),' + ' meh INT(3),'
+        + ' listeners INT(3),'
+        + ' started DATETIME,'
+        + ' grabs INT(3))')
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('Song table added successfully');
+            });
+        });
+
+    //chat table
+    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.chat
+        + '(id INT(11) AUTO_INCREMENT PRIMARY KEY,'
+        + ' userid VARCHAR(255),'
+        + ' chat VARCHAR(255),'
+        + ' time DATETIME)')
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('Chat table added successfully');
+            });
+        });
+
+    //user table
+    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.user
+        + '(userid VARCHAR(255), '
+        + 'username VARCHAR(255), '
+        + 'lastseen DATETIME, '
+        + 'PRIMARY KEY (userid, username))')
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('User table added successfully');
+            });
+        });
+
+    //banned table
+    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.banned
+        + '(id INT(11) AUTO_INCREMENT PRIMARY KEY, '
+        + 'userid VARCHAR(255), '
+        + 'banned_by VARCHAR(255), '
+        + 'timestamp DATETIME)')
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('Banned table added successfully');
+            });
+        });
+}
+
+//Adds the song data to the songdata table.
+//This runs on the endsong event.
+global.addToDb = function(data) {
+    dbclient.query(
+        'INSERT INTO ' + config.database.dbname + '.' + config.database.tablenames.song + ' '
+            + 'SET artist = ?,song = ?, songid = ?, djid = ?, woot = ?, meh = ?,'
+            + 'listeners = ?, started = NOW(), grabs = ?',
+        [currentsong.artist,
+            currentsong.song,
+            currentsong.id,
+            currentsong.djid,
+            currentsong.up,
+            currentsong.down,
+            currentsong.listeners,
+            currentsong.snags])
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('Song record added successfully');
+            });
+        });
 }
 
 //Loads or reloads commands
@@ -189,7 +322,8 @@ PlugAPI.getAuth({
                 moderators.push(Staff[i].id);
             }
         };
-        bot.chat("Hello, world!");
+        events.readyEventHandler();
+//        bot.chat("Hello, world!");
     });
 
     //Events which trigger to reconnect the bot when an error occurs

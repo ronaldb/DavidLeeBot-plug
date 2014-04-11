@@ -5,4 +5,19 @@
 "roomid":"better-off-80-s",
 "admin":"0123456789abcdef01234567",
 "adminPermission":1,
+"database":
+	{"usedb":true,
+	"dbname":"dlb",
+	"logchat":false,
+	"tablenames":
+		{"song": "SONGLIST", 
+		"chat": "CHATLOG", 
+		"user": "USERS",
+		"banned": "BANNED",
+		"holiday": "HOLIDAY_GREETINGS"},
+	"login":{
+		"user":"TheUser",
+		"password":"12345",
+        "host": "localhost"}
+    },
 "debugmode":"false"}
