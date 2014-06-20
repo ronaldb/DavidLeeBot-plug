@@ -1,4 +1,4 @@
-var PlugAPI = require('./plugapi'); //Use 'npm install plugapi'
+var PlugAPI = require('plugapi'); //Use 'npm install plugapi'
 var UPDATECODE = 'h90';
 
 // Initialize some configuration options, connect databases, etc.
@@ -33,7 +33,7 @@ global.currentsong = {
 //                userid: [required for PM], format: [optional]});
 global.output = function(data) {
     if(data.destination == 'chat') {
-        bot.chat(data.text);
+        bot.sendChat(data.text);
     } else if(data.destination == 'pm') {
         bot.pm(data.text, data.userid);
     } else if(data.destination == 'http') {
@@ -298,119 +298,118 @@ function handleCommand (command, text, name, userid, source) {
 
 initializeModules();
 
-// Instead of providing the AUTH, you can use this static method to get the AUTH cookie via twitter login credentials:
-PlugAPI.getAuth({
-    username: config.botinfo.username,
-    password: config.botinfo.password
-}, function(err, auth) { 
-    if(err) {
-        console.log("An error occurred: " + err);
-        return;
-    }
-    bot = new PlugAPI(auth, UPDATECODE);
-    bot.connect(config.roomid);
+var bot = new PlugAPI(config.botinfo.authstr);
+bot.connect(config.roomid);
 
-    //Event which triggers when the bot joins the room
-    bot.on('roomJoin', function(data) {
-        console.log("I'm alive!");
-        populateSongData(data.room);
+bot.on('roomJoin', function(room) {
+    console.log("Joined " + room);
+    populateSongData(room);
 
-        // Create list of moderators (admins)
-        var Staff = bot.getStaff();
-        for (var i = Staff.length - 1; i >= 0; i--) {
-            if (Staff[i].permission >= config.adminPermission) {
-                moderators.push(Staff[i].id);
-            }
-        };
-        events.readyEventHandler();
-//        bot.chat("Hello, world!");
-    });
-
-    //Events which trigger to reconnect the bot when an error occurs
-    var reconnect = function() { 
-        bot.connect(config.roomid);
+    // Create list of moderators (admins)
+    var Staff = bot.getStaff();
+    for (var i = Staff.length - 1; i >= 0; i--) {
+        if (Staff[i].permission >= config.adminPermission) {
+            moderators.push(Staff[i].id);
+        }
     };
-
-    bot.on('close', reconnect);
-    bot.on('error', reconnect);
-
-    //Event which triggers when anyone chats
-    bot.on('chat', function(data) {
-        if (config.debugmode) {
-            console.log('chat:', data);
-        }
-
-        var command=data.message.split(' ')[0].toLowerCase();
-        var firstIndex=data.message.indexOf(' ');
-        var qualifier="";
-        if (firstIndex!=-1){
-            qualifier = data.message.substring(firstIndex+1, data.message.length);
-        }
-        qualifier=qualifier.replace(/&#39;/g, '\'');
-        qualifier=qualifier.replace(/&#34;/g, '\"');
-        qualifier=qualifier.replace(/&amp;/g, '\&');
-        qualifier=qualifier.replace(/&lt;/gi, '\<');
-        qualifier=qualifier.replace(/&gt;/gi, '\>');
-        switch (command)
-        {
-            case '#shutdown':
-                // Gracefully logoff and exit with 0 to stop bot
-                if (data.fromID == config.admin) {
-                    bot.leaveBooth();
-                    bot.chat("Shutting down...");
-                    setTimeout(function() {
-                        process.exit(0);
-                    }, 5000);
-                }
-                else {
-                    bot.chat("I don't think so, " + data.from + "...");
-                }
-                break;
-            case '#restart':
-                // Gracefully logoff and exit with 34 to restart
-                if (data.fromID == config.admin) {
-                    bot.leaveBooth();
-                    bot.chat("Restarting...");
-                    setTimeout(function() {
-                        process.exit(34);
-                    }, 5000);
-                }
-                else {
-                    bot.chat("I don't think so, " + data.from + "...");
-                }
-                break;
-            case '#comebacklater':
-                // Gracefully logoff and exit with 35 to come back after 10 minutes
-                if (data.fromID == config.admin) {
-                    bot.leaveBooth();
-                    bot.chat("I'll be back later!");
-                    setTimeout(function() {
-                        process.exit(35);
-                    }, 5000);
-                }
-                else {
-                    bot.chat("I don't think so, " + data.from + "...");
-                }
-                break;
-            default:
-                handleCommand(command, qualifier, data.from, data.fromID, "chat");
-                break;
-        }
-    });
-
-    bot.on('curateUpdate', events.onCurateUpdate);
-    
-    bot.on('djAdvance', events.onDjAdvance);
-    
-    bot.on('djUpdate', events.onDjUpdate);
-    
-    bot.on('emote', events.onEmote);
-
-    bot.on('userJoin', events.onUserJoin);
-
-    bot.on('userLeave', events.onUserLeave);
-
-    bot.on('userUpdate', events.onUserUpdate);
-
-    bot.on('voteUpdate', events.onVoteUpdate);
+    events.readyEventHandler();
+    bot.sendChat("Hello, world!");
 });
+
+//Events which trigger to reconnect the bot when an error occurs
+var reconnect = function() { 
+    bot.connect(config.roomid);
+};
+
+bot.on('close', reconnect);
+bot.on('error', reconnect);
+
+//Event which triggers when anyone chats
+bot.on('chat', function(data) {
+    if (config.debugmode) {
+        console.log('chat:', data);
+    }
+
+    var command=data.message.split(' ')[0].toLowerCase();
+    var firstIndex=data.message.indexOf(' ');
+    var qualifier="";
+    if (firstIndex!=-1){
+        qualifier = data.message.substring(firstIndex+1, data.message.length);
+    }
+    qualifier=qualifier.replace(/&#39;/g, '\'');
+    qualifier=qualifier.replace(/&#34;/g, '\"');
+    qualifier=qualifier.replace(/&amp;/g, '\&');
+    qualifier=qualifier.replace(/&lt;/gi, '\<');
+    qualifier=qualifier.replace(/&gt;/gi, '\>');
+    switch (command)
+    {
+        case '#shutdown':
+            // Gracefully logoff and exit with 0 to stop bot
+            if (data.fromID == config.admin) {
+                bot.leaveBooth();
+                bot.sendChat("Shutting down...");
+                setTimeout(function() {
+                    process.exit(0);
+                }, 5000);
+            }
+            else {
+                bot.sendChat("I don't think so, " + data.from + "...");
+            }
+            break;
+        case '#restart':
+            // Gracefully logoff and exit with 34 to restart
+            if (data.fromID == config.admin) {
+                bot.leaveBooth();
+                bot.sendChat("Restarting...");
+                setTimeout(function() {
+                    process.exit(34);
+                }, 5000);
+            }
+            else {
+                bot.sendChat("I don't think so, " + data.from + "...");
+            }
+            break;
+        case '#comebacklater':
+            // Gracefully logoff and exit with 35 to come back after 10 minutes
+            if (data.fromID == config.admin) {
+                bot.leaveBooth();
+                bot.sendChat("I'll be back later!");
+                setTimeout(function() {
+                    process.exit(35);
+                }, 5000);
+            }
+            else {
+                bot.sendChat("I don't think so, " + data.from + "...");
+            }
+            break;
+        default:
+            handleCommand(command, qualifier, data.from, data.fromID, "chat");
+            break;
+    }
+});
+
+bot.on('boothCycle', events.onBoothCycle);
+
+bot.on('boothLocked', events.onBoothLocked);
+
+bot.on('chatDelete', events.onChatDelete);
+
+bot.on('curateUpdate', events.onCurateUpdate);
+
+bot.on('djAdvance', events.onDjAdvance);
+
+bot.on('djUpdate', events.onDjUpdate);
+
+bot.on('emote', events.onEmote);
+
+bot.on('followJoin', events.onFollowJoin);
+
+bot.on('modAddDJ', events.onModAddDJ);
+
+bot.on('userJoin', events.onUserJoin);
+
+bot.on('userLeave', events.onUserLeave);
+
+bot.on('userUpdate', events.onUserUpdate);
+
+bot.on('voteUpdate', events.onVoteUpdate);

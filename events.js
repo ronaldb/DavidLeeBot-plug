@@ -7,6 +7,24 @@ exports.readyEventHandler = function (data) {
 
 }
 
+exports.onBoothCycle = function(data) {
+	if (config.debugmode) {
+		console.log("boothCycle:", data);
+	}
+}
+
+exports.onBoothLocked = function(data) {
+	if (config.debugmode) {
+		console.log("boothLocked:", data);
+	}
+}
+
+exports.onChatDelete = function(data) {
+	if (config.debugmode) {
+		console.log("chatDelete:", data);
+	}
+}
+
 exports.onCurateUpdate = function(data) {
 	if (config.debugmode) {
 		console.log("curateUpdate:", data);
@@ -28,7 +46,7 @@ exports.onDjAdvance = function(data) {
 	    if (config.database.usedb) {
 	        addToDb();
 	    }
-	    bot.chat(endsongresponse);
+	    bot.sendChat(endsongresponse);
     }
 
     if (config.debugmode) {
@@ -47,6 +65,42 @@ exports.onDjUpdate = function(data) {
 exports.onEmote = function(data) {
 	if (config.debugmode) {
 		console.log("emote:", data);
+	};
+}
+
+exports.onFollowJoin = function(data) {
+	if (config.debugmode) {
+		console.log("followJoin:", data);
+	};
+}
+
+exports.onModAddDJ = function(data) {
+	if (config.debugmode) {
+		console.log("modAddDJ:", data);
+	};
+}
+
+exports.onModBan = function(data) {
+	if (config.debugmode) {
+		console.log("modBan:", data);
+	};
+}
+
+exports.onModMoveDJ = function(data) {
+	if (config.debugmode) {
+		console.log("modMoveDJ:", data);
+	};
+}
+
+exports.onModRemoveDJ = function(data) {
+	if (config.debugmode) {
+		console.log("modRemoveDJ:", data);
+	};
+}
+
+exports.onModSkip = function(data) {
+	if (config.debugmode) {
+		console.log("modSkip:", data);
 	};
 }
 
