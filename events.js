@@ -126,6 +126,10 @@ exports.onUserJoin = function(data) {
         });
     }
 
+    setTimeout(function () {
+    	bot.sendChat('Hello, ' + data.username + '!');
+    }, 5000);
+
 }
 
 exports.onUserLeave = function(data) {

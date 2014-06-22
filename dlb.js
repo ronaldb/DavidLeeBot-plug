@@ -58,6 +58,11 @@ global.populateSongData = function(data) {
     currentsong.mehed  = false;
     if (data !== null) {
         currentsong.djid   = data.currentDJ;
+        if (data.dj !== null && data.dj !== undefined) {
+            if (data.dj.user !== null) {
+                currentsong.djid = data.dj.user.id;
+            }
+        }
         if (data.media !== null) {
             currentsong.artist = data.media.author;
             currentsong.song   = data.media.title;
@@ -298,12 +303,11 @@ function handleCommand (command, text, name, userid, source) {
 
 initializeModules();
 
-var bot = new PlugAPI(config.botinfo.authstr);
+bot = new PlugAPI(config.botinfo.authstr);
 bot.connect(config.roomid);
 
 bot.on('roomJoin', function(room) {
     console.log("Joined " + room);
-    populateSongData(room);
 
     // Create list of moderators (admins)
     var Staff = bot.getStaff();
