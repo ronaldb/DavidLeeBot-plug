@@ -1,3 +1,30 @@
+exports.readyEventHandler = function (data) {
+    if (config.database.usedb) {
+        setUpDatabase();
+    }
+
+//	loop();
+
+}
+
+exports.onBoothCycle = function(data) {
+	if (config.debugmode) {
+		console.log("boothCycle:", data);
+	}
+}
+
+exports.onBoothLocked = function(data) {
+	if (config.debugmode) {
+		console.log("boothLocked:", data);
+	}
+}
+
+exports.onChatDelete = function(data) {
+	if (config.debugmode) {
+		console.log("chatDelete:", data);
+	}
+}
+
 exports.onCurateUpdate = function(data) {
 	if (config.debugmode) {
 		console.log("curateUpdate:", data);
@@ -13,15 +40,17 @@ exports.onDjAdvance = function(data) {
     var endsongresponse = ':musical_note: ' + currentsong.song + ' stats: '
         + currentsong.up + woots + currentsong.down
         + mehs + currentsong.snags + snags;	
+       
     if (currentsong.song !== null) {
-	    bot.chat(endsongresponse);
+	    //Log song in DB
+	    if (config.database.usedb) {
+	        addToDb();
+	    }
+	    bot.sendChat(endsongresponse);
     }
 
     if (config.debugmode) {
-		console.log("djAdvance:", data);
-		if (data !== null) {
-			console.log("djAdvance-djs:", data.djs);
-		}
+		console.log("djAdvance:", inspect(data, {depth: null}));
     }
 
 	populateSongData(data);
@@ -39,10 +68,68 @@ exports.onEmote = function(data) {
 	};
 }
 
+exports.onFollowJoin = function(data) {
+	if (config.debugmode) {
+		console.log("followJoin:", data);
+	};
+}
+
+exports.onModAddDJ = function(data) {
+	if (config.debugmode) {
+		console.log("modAddDJ:", data);
+	};
+}
+
+exports.onModBan = function(data) {
+	if (config.debugmode) {
+		console.log("modBan:", data);
+	};
+}
+
+exports.onModMoveDJ = function(data) {
+	if (config.debugmode) {
+		console.log("modMoveDJ:", data);
+	};
+}
+
+exports.onModRemoveDJ = function(data) {
+	if (config.debugmode) {
+		console.log("modRemoveDJ:", data);
+	};
+}
+
+exports.onModSkip = function(data) {
+	if (config.debugmode) {
+		console.log("modSkip:", data);
+	};
+}
+
 exports.onUserJoin = function(data) {
 	if (config.debugmode) {
 		console.log("userJoin:", data);
 	}
+
+    //Add user to user table
+    if (config.database.usedb) {
+        dbclient.query('INSERT INTO ' + config.database.dbname + '.' + config.database.tablenames.user
+        + ' (userid, username, lastseen)'
+            + 'VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE lastseen = NOW()',
+            [data.id, data.username])
+        .on('result', function(res) {
+        	res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('User record added successfully');
+            });
+        });
+    }
+
+    setTimeout(function () {
+    	bot.sendChat('Hello, ' + data.username + '!');
+    }, 5000);
+
 }
 
 exports.onUserLeave = function(data) {

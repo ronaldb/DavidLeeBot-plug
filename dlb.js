@@ -1,16 +1,19 @@
-var PlugAPI = require('./plugapi'); //Use 'npm install plugapi'
+var PlugAPI = require('plugapi'); //Use 'npm install plugapi'
 var UPDATECODE = 'h90';
 
 // Initialize some configuration options, connect databases, etc.
 var args = process.argv;
 
 global.fs = require('fs');
+global.inspect = require('util').inspect;
 global.events = require('./events.js');
+global.myutils = require('./myutils.js');
 global.commands = new Array();
 global.moderators = new Array();
 
 global.config;
 global.bot;
+global.dbclient;
 
 global.currentsong = {
     artist:   null,
@@ -30,7 +33,7 @@ global.currentsong = {
 //                userid: [required for PM], format: [optional]});
 global.output = function(data) {
     if(data.destination == 'chat') {
-        bot.chat(data.text);
+        bot.sendChat(data.text);
     } else if(data.destination == 'pm') {
         bot.pm(data.text, data.userid);
     } else if(data.destination == 'http') {
@@ -45,6 +48,7 @@ global.output = function(data) {
 
 global.populateSongData = function(data) {
     var roomScore = bot.getRoomScore();
+    var roomUsers = bot.getUsers();
 
     currentsong.artist = null;
     currentsong.song   = null;
@@ -54,6 +58,11 @@ global.populateSongData = function(data) {
     currentsong.mehed  = false;
     if (data !== null) {
         currentsong.djid   = data.currentDJ;
+        if (data.dj !== null && data.dj !== undefined) {
+            if (data.dj.user !== null) {
+                currentsong.djid = data.dj.user.id;
+            }
+        }
         if (data.media !== null) {
             currentsong.artist = data.media.author;
             currentsong.song   = data.media.title;
@@ -64,9 +73,7 @@ global.populateSongData = function(data) {
     currentsong.snags = roomScore.curates;
     currentsong.up    = roomScore.positive;
     currentsong.down  = roomScore.negative;
-
-    //currentsong = data.room.metadata.current_song;
-    //currentsong.listeners = data.room.metadata.listeners;
+    currentsong.listeners = roomUsers.length;
     //currentsong.started = data.room.metadata.current_song.starttime;
 }
 
@@ -94,7 +101,139 @@ function initializeModules () {
         process.exit(33);
     }
 
+    //Creates mariasql db object
+    if (config.database.usedb) {
+        try {
+            mariasql = require('mariasql');
+        } catch(e) {
+            console.log(e);
+            console.log('It is likely that you do not have the mariadb node module installed.'
+                + '\nUse the command \'npm install mariasql\' to install.');
+            console.log('Starting bot without database functionality.');
+            config.database.usedb = false;
+        }
+    }
+
+    if (config.database.usedb) {
+        //Connects to mariasql server
+        try {
+            var dbhost = 'localhost';
+            if (config.database.login.host != null && config.database.login.host != '') {
+                dbhost = config.database.login.host;
+            }
+            dbclient = new mariasql();
+            dbclient.connect({user: config.database.login.user,
+                              password: config.database.login.password,
+                              database: config.database.dbname,
+                              host: dbhost});
+        } catch(e) {
+            console.log(e);
+            console.log('Make sure that a MariaDB server instance is running and that the '
+                + 'username and password information in config.js are correct.');
+            console.log('Starting bot without database functionality.');
+            config.database.usedb = false;
+        }
+    }
+
     loadCommands(null);
+}
+
+//Sets up the database
+global.setUpDatabase = function() {
+    //song table
+    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.song
+        + '(id INT(11) AUTO_INCREMENT PRIMARY KEY,'
+        + ' artist VARCHAR(255),'
+        + ' song VARCHAR(255),'
+        + ' djid VARCHAR(255),'
+        + ' songid VARCHAR(255),'
+        + ' woot INT(3),' + ' meh INT(3),'
+        + ' listeners INT(3),'
+        + ' started DATETIME,'
+        + ' grabs INT(3))')
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('Song table added successfully');
+            });
+        });
+
+    //chat table
+    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.chat
+        + '(id INT(11) AUTO_INCREMENT PRIMARY KEY,'
+        + ' userid VARCHAR(255),'
+        + ' chat VARCHAR(255),'
+        + ' time DATETIME)')
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('Chat table added successfully');
+            });
+        });
+
+    //user table
+    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.user
+        + '(userid VARCHAR(255), '
+        + 'username VARCHAR(255), '
+        + 'lastseen DATETIME, '
+        + 'PRIMARY KEY (userid, username))')
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('User table added successfully');
+            });
+        });
+
+    //banned table
+    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.banned
+        + '(id INT(11) AUTO_INCREMENT PRIMARY KEY, '
+        + 'userid VARCHAR(255), '
+        + 'banned_by VARCHAR(255), '
+        + 'timestamp DATETIME)')
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('Banned table added successfully');
+            });
+        });
+}
+
+//Adds the song data to the songdata table.
+//This runs on the endsong event.
+global.addToDb = function(data) {
+    dbclient.query(
+        'INSERT INTO ' + config.database.dbname + '.' + config.database.tablenames.song + ' '
+            + 'SET artist = ?,song = ?, songid = ?, djid = ?, woot = ?, meh = ?,'
+            + 'listeners = ?, started = NOW(), grabs = ?',
+        [currentsong.artist,
+            currentsong.song,
+            currentsong.id,
+            currentsong.djid,
+            currentsong.up,
+            currentsong.down,
+            currentsong.listeners,
+            currentsong.snags])
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('Song record added successfully');
+            });
+        });
 }
 
 //Loads or reloads commands
@@ -164,117 +303,117 @@ function handleCommand (command, text, name, userid, source) {
 
 initializeModules();
 
-// Instead of providing the AUTH, you can use this static method to get the AUTH cookie via twitter login credentials:
-PlugAPI.getAuth({
-    username: config.botinfo.username,
-    password: config.botinfo.password
-}, function(err, auth) { 
-    if(err) {
-        console.log("An error occurred: " + err);
-        return;
-    }
-    bot = new PlugAPI(auth, UPDATECODE);
-    bot.connect(config.roomid);
+bot = new PlugAPI(config.botinfo.authstr);
+bot.connect(config.roomid);
 
-    //Event which triggers when the bot joins the room
-    bot.on('roomJoin', function(data) {
-        console.log("I'm alive!");
-        populateSongData(data.room);
+bot.on('roomJoin', function(room) {
+    console.log("Joined " + room);
 
-        // Create list of moderators (admins)
-        var Staff = bot.getStaff();
-        for (var i = Staff.length - 1; i >= 0; i--) {
-            if (Staff[i].permission >= config.adminPermission) {
-                moderators.push(Staff[i].id);
-            }
-        };
-    });
-
-    //Events which trigger to reconnect the bot when an error occurs
-    var reconnect = function() { 
-        bot.connect(config.roomid);
+    // Create list of moderators (admins)
+    var Staff = bot.getStaff();
+    for (var i = Staff.length - 1; i >= 0; i--) {
+        if (Staff[i].permission >= config.adminPermission) {
+            moderators.push(Staff[i].id);
+        }
     };
-
-    bot.on('close', reconnect);
-    bot.on('error', reconnect);
-
-    //Event which triggers when anyone chats
-    bot.on('chat', function(data) {
-        if (config.debugmode) {
-            console.log('chat:', data);
-        }
-
-        var command=data.message.split(' ')[0].toLowerCase();
-        var firstIndex=data.message.indexOf(' ');
-        var qualifier="";
-        if (firstIndex!=-1){
-            qualifier = data.message.substring(firstIndex+1, data.message.length);
-        }
-        qualifier=qualifier.replace(/&#39;/g, '\'');
-        qualifier=qualifier.replace(/&#34;/g, '\"');
-        qualifier=qualifier.replace(/&amp;/g, '\&');
-        qualifier=qualifier.replace(/&lt;/gi, '\<');
-        qualifier=qualifier.replace(/&gt;/gi, '\>');
-        switch (command)
-        {
-            case '#shutdown':
-                // Gracefully logoff and exit with 0 to stop bot
-                if (data.fromID == config.admin) {
-                    bot.leaveBooth();
-                    bot.chat("Shutting down...");
-                    setTimeout(function() {
-                        process.exit(0);
-                    }, 5000);
-                }
-                else {
-                    bot.chat("I don't think so, " + data.from + "...");
-                }
-                break;
-            case '#restart':
-                // Gracefully logoff and exit with 34 to restart
-                if (data.fromID == config.admin) {
-                    bot.leaveBooth();
-                    bot.chat("Restarting...");
-                    setTimeout(function() {
-                        process.exit(34);
-                    }, 5000);
-                }
-                else {
-                    bot.chat("I don't think so, " + data.from + "...");
-                }
-                break;
-            case '#comebacklater':
-                // Gracefully logoff and exit with 35 to come back after 10 minutes
-                if (data.fromID == config.admin) {
-                    bot.leaveBooth();
-                    bot.chat("I'll be back later!");
-                    setTimeout(function() {
-                        process.exit(35);
-                    }, 5000);
-                }
-                else {
-                    bot.chat("I don't think so, " + data.from + "...");
-                }
-                break;
-            default:
-                handleCommand(command, qualifier, data.from, data.fromID, "chat");
-                break;
-        }
-    });
-
-    bot.on('curateUpdate', events.onCurateUpdate);
-    
-    bot.on('djAdvance', events.onDjAdvance);
-    
-    bot.on('djUpdate', events.onDjUpdate);
-    
-    bot.on('emote', events.onEmote);
-
-    bot.on('userJoin', events.onUserJoin);
-
-    bot.on('userLeave', events.onUserLeave);
-
-    bot.on('userUpdate', events.onUserUpdate);
-
-    bot.on('voteUpdate', events.onVoteUpdate);
+    events.readyEventHandler();
+    bot.sendChat("Hello, world!");
 });
+
+//Events which trigger to reconnect the bot when an error occurs
+var reconnect = function() { 
+    bot.connect(config.roomid);
+};
+
+bot.on('close', reconnect);
+bot.on('error', reconnect);
+
+//Event which triggers when anyone chats
+bot.on('chat', function(data) {
+    if (config.debugmode) {
+        console.log('chat:', data);
+    }
+
+    var command=data.message.split(' ')[0].toLowerCase();
+    var firstIndex=data.message.indexOf(' ');
+    var qualifier="";
+    if (firstIndex!=-1){
+        qualifier = data.message.substring(firstIndex+1, data.message.length);
+    }
+    qualifier=qualifier.replace(/&#39;/g, '\'');
+    qualifier=qualifier.replace(/&#34;/g, '\"');
+    qualifier=qualifier.replace(/&amp;/g, '\&');
+    qualifier=qualifier.replace(/&lt;/gi, '\<');
+    qualifier=qualifier.replace(/&gt;/gi, '\>');
+    switch (command)
+    {
+        case '#shutdown':
+            // Gracefully logoff and exit with 0 to stop bot
+            if (data.fromID == config.admin) {
+                bot.leaveBooth();
+                bot.sendChat("Shutting down...");
+                setTimeout(function() {
+                    process.exit(0);
+                }, 5000);
+            }
+            else {
+                bot.sendChat("I don't think so, " + data.from + "...");
+            }
+            break;
+        case '#restart':
+            // Gracefully logoff and exit with 34 to restart
+            if (data.fromID == config.admin) {
+                bot.leaveBooth();
+                bot.sendChat("Restarting...");
+                setTimeout(function() {
+                    process.exit(34);
+                }, 5000);
+            }
+            else {
+                bot.sendChat("I don't think so, " + data.from + "...");
+            }
+            break;
+        case '#comebacklater':
+            // Gracefully logoff and exit with 35 to come back after 10 minutes
+            if (data.fromID == config.admin) {
+                bot.leaveBooth();
+                bot.sendChat("I'll be back later!");
+                setTimeout(function() {
+                    process.exit(35);
+                }, 5000);
+            }
+            else {
+                bot.sendChat("I don't think so, " + data.from + "...");
+            }
+            break;
+        default:
+            handleCommand(command, qualifier, data.from, data.fromID, "chat");
+            break;
+    }
+});
+
+bot.on('boothCycle', events.onBoothCycle);
+
+bot.on('boothLocked', events.onBoothLocked);
+
+bot.on('chatDelete', events.onChatDelete);
+
+bot.on('curateUpdate', events.onCurateUpdate);
+
+bot.on('djAdvance', events.onDjAdvance);
+
+bot.on('djUpdate', events.onDjUpdate);
+
+bot.on('emote', events.onEmote);
+
+bot.on('followJoin', events.onFollowJoin);
+
+bot.on('modAddDJ', events.onModAddDJ);
+
+bot.on('userJoin', events.onUserJoin);
+
+bot.on('userLeave', events.onUserLeave);
+
+bot.on('userUpdate', events.onUserUpdate);
+
+bot.on('voteUpdate', events.onVoteUpdate);
