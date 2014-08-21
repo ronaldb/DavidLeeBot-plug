@@ -10,7 +10,8 @@
 	"dbname":"dlb",
 	"logchat":false,
 	"tablenames":
-		{"song": "SONGLIST", 
+		{"songlist": "SONGLIST",
+		"songs": "SONGS",
 		"chat": "CHATLOG", 
 		"user": "USERS",
 		"banned": "BANNED",

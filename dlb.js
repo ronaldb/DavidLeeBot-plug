@@ -141,7 +141,7 @@ function initializeModules () {
 //Sets up the database
 global.setUpDatabase = function() {
     //song table
-    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.song
+    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.songlist
         + '(id INT(11) AUTO_INCREMENT PRIMARY KEY,'
         + ' artist VARCHAR(255),'
         + ' song VARCHAR(255),'
@@ -157,7 +157,21 @@ global.setUpDatabase = function() {
                 throw(err);
             })
             res.on('end', function(info) {
-                console.log('Song table added successfully');
+                console.log('Songlist table added successfully');
+            });
+        });
+
+    dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.songs
+        + '(songid VARCHAR(255) PRIMARY KEY,'
+        + ' artist VARCHAR(255),'
+        + ' song VARCHAR(255),)')
+        .on('result', function(res) {
+            res.on('error', function(err) {
+                console.log('Result error: ' + inspect(err));
+                throw(err);
+            })
+            res.on('end', function(info) {
+                console.log('Songs table added successfully');
             });
         });
 
