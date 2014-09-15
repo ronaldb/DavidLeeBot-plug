@@ -1,4 +1,4 @@
-var PlugAPI = require('plugapi'); //Use 'npm install plugapi'
+var PlugAPI = require('./plugapi'); //Use 'npm install plugapi'
 var UPDATECODE = 'h90';
 
 // Initialize some configuration options, connect databases, etc.
@@ -303,12 +303,16 @@ function handleCommand (command, text, name, userid, source) {
 
 initializeModules();
 
-bot = new PlugAPI(config.botinfo.authstr);
+bot = new PlugAPI({
+    "email": config.botinfo.username,
+    "password": config.botinfo.password
+});
 bot.connect(config.roomid);
 
 bot.on('roomJoin', function(room) {
     console.log("Joined " + room);
 
+/*
     // Create list of moderators (admins)
     var Staff = bot.getStaff();
     for (var i = Staff.length - 1; i >= 0; i--) {
@@ -318,6 +322,7 @@ bot.on('roomJoin', function(room) {
     };
     events.readyEventHandler();
     bot.sendChat("Hello, world!");
+*/    
 });
 
 //Events which trigger to reconnect the bot when an error occurs
@@ -331,11 +336,13 @@ bot.on('error', reconnect);
 //Event which triggers when anyone chats
 bot.on('chat', function(data) {
     /* Change in chat data */
-    data.fromID = data.fid;
+    data.fromID = data.uid;
+    data.from = data.un;
     
     if (config.debugmode) {
         console.log('chat:', data);
     }
+
 
     var command=data.message.split(' ')[0].toLowerCase();
     var firstIndex=data.message.indexOf(' ');
@@ -395,6 +402,7 @@ bot.on('chat', function(data) {
     }
 });
 
+/*
 bot.on('boothCycle', events.onBoothCycle);
 
 bot.on('boothLocked', events.onBoothLocked);
@@ -420,3 +428,4 @@ bot.on('userLeave', events.onUserLeave);
 bot.on('userUpdate', events.onUserUpdate);
 
 bot.on('voteUpdate', events.onVoteUpdate);
+*/
