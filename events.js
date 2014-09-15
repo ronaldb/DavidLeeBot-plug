@@ -7,6 +7,31 @@ exports.readyEventHandler = function (data) {
 
 }
 
+exports.onAdvance = function(data) {
+    if (config.debugmode) {
+		console.log("advance:", inspect(data, {depth: null}));
+    }
+/*
+    var woots = currentsong.up == 1 ? " woot, " : " woots, ";
+    var mehs  = currentsong.down == 1 ? " meh, " : " mehs, ";
+    var snags = currentsong.snags == 1 ? " grab." : " grabs.";
+    
+    var endsongresponse = ':musical_note: ' + currentsong.song + ' stats: '
+        + currentsong.up + woots + currentsong.down
+        + mehs + currentsong.snags + snags;	
+       
+    if (currentsong.song !== null) {
+	    //Log song in DB
+	    if (config.database.usedb) {
+	        addToDb();
+	    }
+	    bot.sendChat(endsongresponse);
+    }
+
+	populateSongData(data);
+*/	
+}
+
 exports.onBoothCycle = function(data) {
 	if (config.debugmode) {
 		console.log("boothCycle:", data);
@@ -30,30 +55,6 @@ exports.onCurateUpdate = function(data) {
 		console.log("curateUpdate:", data);
 	};
 	currentsong.snags += 1; // Assuming you can only grab once...
-}
-
-exports.onDjAdvance = function(data) {
-    var woots = currentsong.up == 1 ? " woot, " : " woots, ";
-    var mehs  = currentsong.down == 1 ? " meh, " : " mehs, ";
-    var snags = currentsong.snags == 1 ? " grab." : " grabs.";
-    
-    var endsongresponse = ':musical_note: ' + currentsong.song + ' stats: '
-        + currentsong.up + woots + currentsong.down
-        + mehs + currentsong.snags + snags;	
-       
-    if (currentsong.song !== null) {
-	    //Log song in DB
-	    if (config.database.usedb) {
-	        addToDb();
-	    }
-	    bot.sendChat(endsongresponse);
-    }
-
-    if (config.debugmode) {
-		console.log("djAdvance:", inspect(data, {depth: null}));
-    }
-
-	populateSongData(data);
 }
 
 exports.onDjUpdate = function(data) {
@@ -108,9 +109,9 @@ exports.onUserJoin = function(data) {
 	if (config.debugmode) {
 		console.log("userJoin:", data);
 	}
-
-    //Add user to user table
+/*
     if (config.database.usedb) {
+	    //Add user to user table
         dbclient.query('INSERT INTO ' + config.database.dbname + '.' + config.database.tablenames.user
         + ' (userid, username, lastseen)'
             + 'VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE lastseen = NOW()',
@@ -129,7 +130,7 @@ exports.onUserJoin = function(data) {
     setTimeout(function () {
     	bot.sendChat('Hello, ' + data.username + '!');
     }, 5000);
-
+*/
 }
 
 exports.onUserLeave = function(data) {
@@ -151,8 +152,9 @@ exports.onVoteUpdate = function(data) {
 		console.log("voteUpdate:", data);
 		console.log("DJ", data.id, " made ", (data.vote == 1 ? "up" : "down"), " vote");
 	}
-
+/*
 	currentsong.up = roomScore.positive;
 	currentsong.down = roomScore.negative;
 	currentsong.snags = roomScore.curates;
+*/	
 }
