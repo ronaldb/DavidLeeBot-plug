@@ -403,28 +403,22 @@ bot.on('chat', function(data) {
 });
 
 bot.on('advance', events.onAdvance);
+bot.on('ban', events.onBan);
 bot.on('boothCycle', events.onBoothCycle);
 bot.on('boothLocked', events.onBoothLocked);
 bot.on('chatDelete', events.onChatDelete);
+bot.on('command', events.onCommand);
 bot.on('emote', events.onEmote);
 bot.on('followJoin', events.onFollowJoin);
-bot.on('modAddDJ', events.onModAddDJ);
-bot.on('userJoin', events.onUserJoin);
-bot.on('userLeave', events.onUserLeave);
-bot.on('userUpdate', events.onUserUpdate);
-
-//New events - no event handler yet
-/*
-bot.on('ban', events.onBan);
-bot.on('command', events.onCommand);
 bot.on('grab',events.onGrab);
+bot.on('modAddDJ', events.onModAddDJ);
 bot.on('modAddWaitlist',events.onModAddWaitlist);
-bot.on('modAmbassador',events.onModAmbassador);
+//bot.on('modAmbassador',events.onModAmbassador);
 bot.on('modBan',events.onModBan);
 bot.on('modMoveDJ',events.onModMoveDJ);
 bot.on('modMute',events.onModMute);
 bot.on('modRemoveDJ',events.onModRemoveDJ);
-bot.on('modRemoveWaitList',events.onModRemoveWaitList);
+//bot.on('modRemoveWaitList',events.onModRemoveWaitList);
 bot.on('modSkip',events.onModSkip);
 bot.on('modStaff',events.onModStaff);
 bot.on('pdjMessage',events.onPdjMessage);
@@ -443,8 +437,10 @@ bot.on('skip',events.onSkip);
 bot.on('strobeToggle',events.onStrobeToggle);
 bot.on('userCounterUpdate',events.onUserCounterUpdate);
 bot.on('userFollow',events.onUserFollow);
+bot.on('userJoin', events.onUserJoin);
+bot.on('userLeave', events.onUserLeave);
+bot.on('userUpdate', events.onUserUpdate);
 bot.on('vote',events.onVote);
-*/
 
 //Old events - no longer firing
 bot.on('curateUpdate', events.onCurateUpdate);

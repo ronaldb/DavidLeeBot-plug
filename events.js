@@ -32,6 +32,12 @@ exports.onAdvance = function(data) {
 */	
 }
 
+exports.onBan = function(data) {
+	if (config.debugmode) {
+		console.log("ban:", data);
+	}
+}
+
 exports.onBoothCycle = function(data) {
 	if (config.debugmode) {
 		console.log("boothCycle:", data);
@@ -47,6 +53,12 @@ exports.onBoothLocked = function(data) {
 exports.onChatDelete = function(data) {
 	if (config.debugmode) {
 		console.log("chatDelete:", data);
+	}
+}
+
+exports.onCommand = function(data) {
+	if (config.debugmode) {
+		console.log("command:", data);
 	}
 }
 
@@ -75,10 +87,22 @@ exports.onFollowJoin = function(data) {
 	};
 }
 
+exports.onGrab = function(data) {
+	if (config.debugmode) {
+		console.log("grab:", data);
+	}
+}
+
 exports.onModAddDJ = function(data) {
 	if (config.debugmode) {
 		console.log("modAddDJ:", data);
 	};
+}
+
+exports.onModAddWaitlist = function(data) {
+	if (config.debugmode) {
+		console.log("modAddWaitlist:", data);
+	}
 }
 
 exports.onModBan = function(data) {
@@ -93,15 +117,135 @@ exports.onModMoveDJ = function(data) {
 	};
 }
 
+exports.onModMute = function(data) {
+	if (config.debugmode) {
+		console.log("modMute:", data);
+	};
+}
+
 exports.onModRemoveDJ = function(data) {
 	if (config.debugmode) {
 		console.log("modRemoveDJ:", data);
 	};
 }
 
+exports.onModRemoveWaitlist = function(data) {
+	if (config.debugmode) {
+		console.log("modRemoveWaitlist:", data);
+	};
+}
+
 exports.onModSkip = function(data) {
 	if (config.debugmode) {
 		console.log("modSkip:", data);
+	};
+}
+
+exports.onModStaff = function(data) {
+	if (config.debugmode) {
+		console.log("modStaff:", data);
+	};
+}
+
+exports.onPdjMessage = function(data) {
+	if (config.debugmode) {
+		console.log("pdjMessage:", data);
+	};
+}
+
+exports.onPdjUpdate = function(data) {
+	if (config.debugmode) {
+		console.log("pdjUpdate:", data);
+	};
+}
+
+exports.onPing = function(data) {
+	if (config.debugmode) {
+		console.log("ping:", data);
+	};
+}
+
+exports.onPlaylistCycle = function(data) {
+	if (config.debugmode) {
+		console.log("playlistCycle:", data);
+	};
+}
+
+exports.onRequestDuration = function(data) {
+	if (config.debugmode) {
+		console.log("requestDuration:", data);
+	};
+}
+
+exports.onRequestDurationRetry = function(data) {
+	if (config.debugmode) {
+		console.log("requestDurationRetry:", data);
+	};
+}
+
+exports.onRoomChanged = function(data) {
+	if (config.debugmode) {
+		console.log("roomChanged:", data);
+	};
+}
+
+exports.onRoomDescriptionUpdate = function(data) {
+	if (config.debugmode) {
+		console.log("roomDescriptionUpdate:", data);
+	};
+}
+
+exports.onRoomNameUpdate = function(data) {
+	if (config.debugmode) {
+		console.log("roomNameUpdate:", data);
+	};
+}
+
+exports.onRoomVoteSkip = function(data) {
+	if (config.debugmode) {
+		console.log("roomVoteSkip:", data);
+	};
+}
+
+exports.onRoomWelcomeUpdate = function(data) {
+	if (config.debugmode) {
+		console.log("roomWelcomeUpdate:", data);
+	};
+}
+
+exports.onRoomDescriptionUpdate = function(data) {
+	if (config.debugmode) {
+		console.log("roomDescriptionUpdate:", data);
+	};
+}
+
+exports.onSessionClose = function(data) {
+	if (config.debugmode) {
+		console.log("sessionClose:", data);
+	};
+}
+
+exports.onSkip = function(data) {
+	if (config.debugmode) {
+		console.log("skip:", data);
+	};
+}
+
+exports.onStrobeToggle = function(data) {
+	if (config.debugmode) {
+		console.log("strobeToggle:", data);
+	};
+}
+
+exports.onUserCounterUpdate = function(data) {
+	if (config.debugmode) {
+		console.log("userCounterUpdate:", data);
+	};
+}
+
+exports.onUserFollow = function(data) {
+	if (config.debugmode) {
+		console.log("userFollow:", data);
 	};
 }
 
@@ -142,6 +286,12 @@ exports.onUserLeave = function(data) {
 exports.onUserUpdate = function(data) {
 	if (config.debugmode) {
 		console.log("userUpdate:", data);
+	};
+}
+
+exports.onVote = function(data) {
+	if (config.debugmode) {
+		console.log("vote:", data);
 	};
 }
 
