@@ -336,8 +336,8 @@ bot.on('error', reconnect);
 //Event which triggers when anyone chats
 bot.on('chat', function(data) {
     /* Change in chat data */
-    data.fromID = data.uid;
-    data.from = data.un;
+    data.fromID = data.raw.uid;
+    data.from = data.raw.un;
     
     if (config.debugmode) {
         console.log('chat:', data);
