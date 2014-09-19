@@ -11,8 +11,8 @@ exports.onAdvance = function(data) {
     if (config.debugmode) {
 		console.log("advance:", inspect(data, {depth: null}));
     }
-/*
-    var woots = currentsong.up == 1 ? " woot, " : " woots, ";
+
+    var woots = currentsong.positive == 1 ? " woot, " : " woots, ";
     var mehs  = currentsong.down == 1 ? " meh, " : " mehs, ";
     var snags = currentsong.snags == 1 ? " grab." : " grabs.";
     
@@ -29,7 +29,6 @@ exports.onAdvance = function(data) {
     }
 
 	populateSongData(data);
-*/	
 }
 
 exports.onBan = function(data) {
@@ -274,7 +273,7 @@ exports.onUserJoin = function(data) {
     setTimeout(function () {
     	bot.sendChat('Hello, ' + data.username + '!');
     }, 5000);
-*/
+*/    
 }
 
 exports.onUserLeave = function(data) {
@@ -290,21 +289,14 @@ exports.onUserUpdate = function(data) {
 }
 
 exports.onVote = function(data) {
-	if (config.debugmode) {
-		console.log("vote:", data);
-	};
-}
-
-exports.onVoteUpdate = function(data) {
 	var roomScore = bot.getRoomScore();
 
 	if (config.debugmode) {
-		console.log("voteUpdate:", data);
-		console.log("DJ", data.id, " made ", (data.vote == 1 ? "up" : "down"), " vote");
-	}
-/*
-	currentsong.up = roomScore.positive;
-	currentsong.down = roomScore.negative;
-	currentsong.snags = roomScore.curates;
-*/	
+		console.log("vote:", data);
+		console.log("DJ", data.i, " made ", (data.v == 1 ? "up" : "down"), " vote");
+	};
+
+	currentsong.up    = roomScore.positive;
+	currentsong.down  = roomScore.negative;
+	currentsong.snags = roomScore.grabs;
 }

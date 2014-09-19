@@ -57,11 +57,8 @@ global.populateSongData = function(data) {
     currentsong.wooted = false;
     currentsong.mehed  = false;
     if (data !== null) {
-        currentsong.djid   = data.currentDJ;
-        if (data.dj !== null && data.dj !== undefined) {
-            if (data.dj.user !== null) {
-                currentsong.djid = data.dj.user.id;
-            }
+        if (data.currentDJ !== null) {
+            currentsong.djid   = data.currentDJ.id;
         }
         if (data.media !== null) {
             currentsong.artist = data.media.author;
@@ -70,11 +67,11 @@ global.populateSongData = function(data) {
         }
     }
 
-    currentsong.snags = roomScore.curates;
+    currentsong.snags = roomScore.grabs;
     currentsong.up    = roomScore.positive;
     currentsong.down  = roomScore.negative;
     currentsong.listeners = roomUsers.length;
-    //currentsong.started = data.room.metadata.current_song.starttime;
+    currentsong.started = data.starttime;
 }
 
 //Checks if the user id is present in the admin list. Authentication
@@ -321,8 +318,8 @@ bot.on('roomJoin', function(room) {
         }
     };
     events.readyEventHandler();
+*/
     bot.sendChat("Hello, world!");
-*/    
 });
 
 //Events which trigger to reconnect the bot when an error occurs
@@ -445,4 +442,3 @@ bot.on('vote',events.onVote);
 //Old events - no longer firing
 bot.on('curateUpdate', events.onCurateUpdate);
 bot.on('djUpdate', events.onDjUpdate);
-bot.on('voteUpdate', events.onVoteUpdate);
