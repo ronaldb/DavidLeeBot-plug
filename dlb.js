@@ -10,6 +10,7 @@ global.events = require('./events.js');
 global.myutils = require('./myutils.js');
 global.commands = new Array();
 global.moderators = new Array();
+global.startDate = new Date();
 
 global.config;
 global.bot;
