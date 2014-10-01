@@ -252,7 +252,6 @@ exports.onUserJoin = function(data) {
 	if (config.debugmode) {
 		console.log("userJoin:", data);
 	}
-/*
     if (config.database.usedb) {
 	    //Add user to user table
         dbclient.query('INSERT INTO ' + config.database.dbname + '.' + config.database.tablenames.user
@@ -271,9 +270,8 @@ exports.onUserJoin = function(data) {
     }
 
     setTimeout(function () {
-    	bot.sendChat('Hello, ' + data.username + '!');
+    	bot.sendChat('Hello, @' + data.username + '!');
     }, 5000);
-*/    
 }
 
 exports.onUserLeave = function(data) {
