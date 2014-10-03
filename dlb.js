@@ -27,6 +27,7 @@ global.currentsong = {
     snags:    0,
     wooted:   false,
     mehed:    false,
+    rolled:   false,
     id:       null    
 }
 
@@ -57,6 +58,7 @@ global.populateSongData = function(data) {
     currentsong.djid   = null;
     currentsong.wooted = false;
     currentsong.mehed  = false;
+    currentsong.rolled = false;
     if (data !== null) {
         if (data.currentDJ !== null) {
             currentsong.djid   = data.currentDJ.id;
