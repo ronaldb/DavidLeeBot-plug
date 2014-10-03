@@ -5,7 +5,9 @@ exports.hidden = false;
 exports.enabled = true;
 exports.matchStart = false;
 exports.handler = function(data) {
-	var now = new Date();
-    var response = 'I''ve been up for ' + myUtils.daysBetween(startTime,now); 
+    var response = 'I\'ve been up for ';
+    nowTime = new Date();
+    uptime = myutils.daysBetween(startDate,nowTime);
+    response += uptime;
     output({text: response, destination: data.source, userid: data.userid});
 }
