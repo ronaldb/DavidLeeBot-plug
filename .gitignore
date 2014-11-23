@@ -4,3 +4,4 @@ config.json
 plugAPI
 plugapi-old/
 plugbotapi/
+roomState.json
