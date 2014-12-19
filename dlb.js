@@ -1,4 +1,4 @@
-var PlugAPI = require('plugapi'); //Use 'npm install plugapi'
+var PlugAPI = require('./plugapi'); //Use 'npm install plugapi'
 var UPDATECODE = 'h90';
 
 // Initialize some configuration options, connect databases, etc.
@@ -10,6 +10,7 @@ global.events = require('./events.js');
 global.myutils = require('./myutils.js');
 global.commands = new Array();
 global.moderators = new Array();
+global.startDate = new Date();
 
 global.config;
 global.bot;
@@ -26,6 +27,7 @@ global.currentsong = {
     snags:    0,
     wooted:   false,
     mehed:    false,
+    rolled:   false,
     id:       null    
 }
 
@@ -56,12 +58,10 @@ global.populateSongData = function(data) {
     currentsong.djid   = null;
     currentsong.wooted = false;
     currentsong.mehed  = false;
+    currentsong.rolled = false;
     if (data !== null) {
-        currentsong.djid   = data.currentDJ;
-        if (data.dj !== null && data.dj !== undefined) {
-            if (data.dj.user !== null) {
-                currentsong.djid = data.dj.user.id;
-            }
+        if (data.currentDJ !== null) {
+            currentsong.djid   = data.currentDJ.id;
         }
         if (data.media !== null) {
             currentsong.artist = data.media.author;
@@ -70,11 +70,11 @@ global.populateSongData = function(data) {
         }
     }
 
-    currentsong.snags = roomScore.curates;
+    currentsong.snags = roomScore.grabs;
     currentsong.up    = roomScore.positive;
     currentsong.down  = roomScore.negative;
     currentsong.listeners = roomUsers.length;
-    //currentsong.started = data.room.metadata.current_song.starttime;
+    currentsong.started = data.starttime;
 }
 
 //Checks if the user id is present in the admin list. Authentication
@@ -303,12 +303,16 @@ function handleCommand (command, text, name, userid, source) {
 
 initializeModules();
 
-bot = new PlugAPI(config.botinfo.authstr);
+bot = new PlugAPI({
+    "email": config.botinfo.username,
+    "password": config.botinfo.password
+});
 bot.connect(config.roomid);
 
 bot.on('roomJoin', function(room) {
     console.log("Joined " + room);
 
+/*
     // Create list of moderators (admins)
     var Staff = bot.getStaff();
     for (var i = Staff.length - 1; i >= 0; i--) {
@@ -317,6 +321,7 @@ bot.on('roomJoin', function(room) {
         }
     };
     events.readyEventHandler();
+*/
     bot.sendChat("Hello, world!");
 });
 
@@ -331,11 +336,13 @@ bot.on('error', reconnect);
 //Event which triggers when anyone chats
 bot.on('chat', function(data) {
     /* Change in chat data */
-    data.fromID = data.fid;
+    data.fromID = data.raw.uid;
+    data.from = data.raw.un;
     
     if (config.debugmode) {
         console.log('chat:', data);
     }
+
 
     var command=data.message.split(' ')[0].toLowerCase();
     var firstIndex=data.message.indexOf(' ');
@@ -395,28 +402,46 @@ bot.on('chat', function(data) {
     }
 });
 
+bot.on('advance', events.onAdvance);
+bot.on('ban', events.onBan);
 bot.on('boothCycle', events.onBoothCycle);
-
 bot.on('boothLocked', events.onBoothLocked);
-
 bot.on('chatDelete', events.onChatDelete);
-
-bot.on('curateUpdate', events.onCurateUpdate);
-
-bot.on('djAdvance', events.onDjAdvance);
-
-bot.on('djUpdate', events.onDjUpdate);
-
+bot.on('command', events.onCommand);
 bot.on('emote', events.onEmote);
-
 bot.on('followJoin', events.onFollowJoin);
-
+bot.on('grab',events.onGrab);
 bot.on('modAddDJ', events.onModAddDJ);
-
+bot.on('modAddWaitlist',events.onModAddWaitlist);
+//bot.on('modAmbassador',events.onModAmbassador);
+bot.on('modBan',events.onModBan);
+bot.on('modMoveDJ',events.onModMoveDJ);
+bot.on('modMute',events.onModMute);
+bot.on('modRemoveDJ',events.onModRemoveDJ);
+//bot.on('modRemoveWaitList',events.onModRemoveWaitList);
+bot.on('modSkip',events.onModSkip);
+bot.on('modStaff',events.onModStaff);
+bot.on('pdjMessage',events.onPdjMessage);
+bot.on('pdjUpdate',events.onPdjUpdate);
+bot.on('ping',events.onPing);
+bot.on('playlistCycle',events.onPlaylistCycle);
+bot.on('requestDuration',events.onRequestDuration);
+bot.on('requestDurationRetry',events.onRequestDurationRetry);
+bot.on('roomChanged',events.onRoomChanged);
+bot.on('roomDescriptionUpdate',events.onRoomDescriptionUpdate);
+bot.on('roomNameUpdate',events.onRoomNameUpdate);
+bot.on('roomVoteSkip',events.onRoomVoteSkip);
+bot.on('roomWelcomeUpdate',events.onRoomWelcomeUpdate);
+bot.on('sessionClose',events.onSessionClose);
+bot.on('skip',events.onSkip);
+bot.on('strobeToggle',events.onStrobeToggle);
+bot.on('userCounterUpdate',events.onUserCounterUpdate);
+bot.on('userFollow',events.onUserFollow);
 bot.on('userJoin', events.onUserJoin);
-
 bot.on('userLeave', events.onUserLeave);
-
 bot.on('userUpdate', events.onUserUpdate);
+bot.on('vote',events.onVote);
 
-bot.on('voteUpdate', events.onVoteUpdate);
+//Old events - no longer firing
+bot.on('curateUpdate', events.onCurateUpdate);
+bot.on('djUpdate', events.onDjUpdate);
