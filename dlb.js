@@ -63,7 +63,7 @@ global.populateSongData = function(data) {
                 currentsong.djid = data.dj.user.id;
             }
         }
-        if (data.media !== null) {
+        if (data.media !== null && data.media !== undefined) {
             currentsong.artist = data.media.author;
             currentsong.song   = data.media.title;
             currentsong.id     = data.media.cid;
@@ -322,7 +322,9 @@ bot.on('roomJoin', function(room) {
 
 //Events which trigger to reconnect the bot when an error occurs
 var reconnect = function() { 
+    setTimeOut(function() {
     bot.connect(config.roomid);
+    }, 5000);
 };
 
 bot.on('close', reconnect);
