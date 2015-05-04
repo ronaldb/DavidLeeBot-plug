@@ -1,4 +1,4 @@
-var PlugAPI = require('./plugapi'); //Use 'npm install plugapi'
+var PlugAPI = require('plugapi'); //Use 'npm install plugapi'
 var UPDATECODE = 'h90';
 
 // Initialize some configuration options, connect databases, etc.
@@ -59,11 +59,11 @@ global.populateSongData = function(data) {
     currentsong.wooted = false;
     currentsong.mehed  = false;
     currentsong.rolled = false;
-    if (data !== null) {
-        if (data.currentDJ !== null) {
+    if (data) {
+        if (data.currentDJ) {
             currentsong.djid   = data.currentDJ.id;
         }
-        if (data.media !== null) {
+        if (data.media) {
             currentsong.artist = data.media.author;
             currentsong.song   = data.media.title;
             currentsong.id     = data.media.cid;
