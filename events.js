@@ -28,7 +28,8 @@ exports.onAdvance = function(data) {
 	    bot.sendChat(endsongresponse);
     }
 
-	populateSongData(data);
+    populateSongData(data);
+    myutils.trackStuck();
 }
 
 exports.onBan = function(data) {

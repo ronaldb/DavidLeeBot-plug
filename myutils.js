@@ -23,3 +23,14 @@ exports.daysBetween = function( date1, date2 ) {
   
   return (days === 0 ? '' : days + ' days, ') + (days === 0 && hours === 0 ? '' : hours + ' hours, ') + (days === 0 && hours === 0 && minutes === 0 ? '' : minutes + ' minutes, and ') + seconds + ' seconds';
 }
+
+exports.trackStuck = function () {
+  var a = { cid: currentsong.id, djid: currentsong.djid};
+  setTimeout(function() {
+    var b = { cid: currentsong.id, djid: currentsong.djid};
+    if ((a.cid === b.cid) && (a.djid === b.djid)) {
+      output({text: 'Track stuck, force skipping!', destination: 'chat'});
+      bot.moderateForceSkip();
+    }
+  }, (currentsong.duration * 1000) + 20000);
+}
