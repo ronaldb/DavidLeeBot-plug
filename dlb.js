@@ -1,4 +1,4 @@
-var PlugAPI = require('./plugapi'); //Use 'npm install plugapi'
+var PlugAPI = require('plugapi'); //Use 'npm install plugapi'
 var UPDATECODE = 'h90';
 
 // Initialize some configuration options, connect databases, etc.
@@ -21,6 +21,7 @@ global.currentsong = {
     song:     null,
     djname:   null,
     djid:     null,
+    duration: 0,
     up:       0,
     down:     0,
     listeners:0,
@@ -59,14 +60,15 @@ global.populateSongData = function(data) {
     currentsong.wooted = false;
     currentsong.mehed  = false;
     currentsong.rolled = false;
-    if (data !== null) {
-        if (data.currentDJ !== null) {
+    if (data) {
+        if (data.currentDJ) {
             currentsong.djid   = data.currentDJ.id;
         }
-        if (data.media !== null && data.media !== undefined) {
+        if (data.media) {
             currentsong.artist = data.media.author;
             currentsong.song   = data.media.title;
             currentsong.id     = data.media.cid;
+            currentsong.duration = data.media.duration;
         }
     }
 
@@ -327,8 +329,8 @@ bot.on('roomJoin', function(room) {
 
 //Events which trigger to reconnect the bot when an error occurs
 var reconnect = function() { 
-    setTimeOut(function() {
-    bot.connect(config.roomid);
+    setTimeOut(function () {
+        bot.connect(config.roomid);
     }, 5000);
 };
 
