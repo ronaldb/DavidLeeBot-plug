@@ -22,6 +22,11 @@ exports.handler = function(data) {
                 currentsong.wooted = true;
                 bot.woot();
             }
+            else if (currentsong.djid == config.admin) {
+                response = 'Yes, master...';
+                currentsong.wooted = true;
+                bot.woot();
+            }
             else {
                 response = 'Sorry, you rolled a ' + dieRoll.toString() + ', and you needed a ' + myWoots.toString() + ' or less.';
             }

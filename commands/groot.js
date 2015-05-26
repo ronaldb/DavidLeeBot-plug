@@ -13,7 +13,9 @@ exports.handler = function(data) {
                      "http://i.imgur.com/Iyl7WKU.gif",
                      "http://i.imgur.com/Okzfq5E.gif",
                      "http://i.imgur.com/1GpkElw.gif",
+                     "http://i.imgur.com/Smx1uL8.png",
                      "http://i.imgur.com/C0F5GYP.gif"];
     var response = myutils.pickone(responses);
     output({text: response, destination: data.source, userid: data.userid});
 }
+

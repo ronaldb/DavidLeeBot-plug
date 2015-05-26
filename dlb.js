@@ -21,6 +21,7 @@ global.currentsong = {
     song:     null,
     djname:   null,
     djid:     null,
+    duration: 0,
     up:       0,
     down:     0,
     listeners:0,
@@ -67,6 +68,7 @@ global.populateSongData = function(data) {
             currentsong.artist = data.media.author;
             currentsong.song   = data.media.title;
             currentsong.id     = data.media.cid;
+            currentsong.duration = data.media.duration;
         }
     }
 
@@ -327,7 +329,9 @@ bot.on('roomJoin', function(room) {
 
 //Events which trigger to reconnect the bot when an error occurs
 var reconnect = function() { 
-    bot.connect(config.roomid);
+    setTimeOut(function () {
+        bot.connect(config.roomid);
+    }, 5000);
 };
 
 bot.on('close', reconnect);
