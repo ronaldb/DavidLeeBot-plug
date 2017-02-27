@@ -1,0 +1,30 @@
+{
+  "name": "davidleebot-plug",
+  "version": "1.0.0",
+  "description": "David Lee Bot is a plug.dj bot, responsible for keeping track of people's played songs.",
+  "main": "dlb.js",
+  "dependencies": {
+    "airbrake": "^1.2.0",
+    "mariasql": "^0.2.6",
+    "plugapi": "^4.2.3"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ronaldb/DavidLeeBot-plug.git"
+  },
+  "keywords": [
+    "Plug",
+    "bot",
+    "music"
+  ],
+  "author": "Ronald Bruintjes",
+  "license": "LGPL-3.0",
+  "bugs": {
+    "url": "https://github.com/ronaldb/DavidLeeBot-plug/issues"
+  },
+  "homepage": "https://github.com/ronaldb/DavidLeeBot-plug#readme"
+}
