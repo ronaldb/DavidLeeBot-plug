@@ -39,6 +39,31 @@ exports.handler = function(data) {
         else
             response = "I can't woot any louder!";
     }
+    else if (data.userid == currentsong.djid) {
+        if (currentsong.rolled) {
+            response = 'Sorry, you already tried to woot for yourself.';
+        }
+        else {
+            if (data.userid === config.admin) {
+                myWoots = 1;
+                dieRoll = 1;
+            }
+            else {
+                myWoots = Math.max(Math.min(currentsong.up,5),1);
+                dieRoll = Math.floor(Math.random() * 6) + 1;
+                console.log(myWoots,dieRoll);
+            }
+            if (dieRoll <= myWoots) {
+                currentsong.wooted = true;
+                currentsong.mehed = false;
+                bot.woot();
+            }
+            else {
+                response = 'Sorry, I\'m not wooting for you this time...';
+            }
+            currentsong.rolled = true;
+        }
+    }
     else {
         currentsong.wooted = true;
         currentsong.mehed  = false;
