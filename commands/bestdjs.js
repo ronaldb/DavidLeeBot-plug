@@ -15,7 +15,7 @@ exports.handler = function(data) {
             + ' ORDER BY lastseen DESC) as test GROUP BY userid)'
             + ' b ON a.djid = b.userid ORDER BY upvotes DESC LIMIT 3')
         .on('result', function(res) {
-            res.on('row', function(row) {
+            res.on('data', function(row) {
                 response += row.username + ': ' + row.upvotes + ' points.  ';
             })
             res.on('end', function(info) {

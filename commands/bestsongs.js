@@ -11,7 +11,7 @@ exports.handler = function(data) {
         dbclient.query('SELECT CONCAT(song,\' by \',artist) AS TRACK, woot FROM '
             + config.database.dbname + '.' + config.database.tablenames.song + ' ORDER BY woot DESC LIMIT 3')
         .on('result', function(res) {
-            res.on('row', function(row) {
+            res.on('data', function(row) {
                 response += row.TRACK + ': ' + row.woot + ' points.  ';
             })
             res.on('end', function(info) {

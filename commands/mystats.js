@@ -7,46 +7,39 @@ exports.enabled = true;
 exports.matchStart = false;
 exports.handler = function(data) {
     if (config.database.usedb) {
-        dbclient.query('SET @rownum := 0')
-        .on('result', function(res) {
-            res.on('error', function(err) {
+        dbclient.query('SET @rownum := 0', null, { useArray: true }, function(err,rows) {
+            if (err) {
                 console.log('Result error: ' + inspect(err));
                 throw(err);
-            })
-            res.on('end', function(info) {
-                dbclient.query('SELECT @rank := rank FROM (SELECT @rownum := @rownum + 1 AS '
-                    + 'rank, djid, POINTS FROM (SELECT djid, sum(woot) as POINTS from '
-                    + config.database.dbname + '.' + config.database.tablenames.song
-                    + ' group by djid order by sum(woot) desc) as test) as rank where '
-                    + 'djid like \'' + data.userid + '\'')
-                .on('result', function(res) {
-                    res.on('error', function(err) {
+            }
+            dbclient.query('SELECT @rank := rank FROM (SELECT @rownum := @rownum + 1 AS '
+                + 'rank, djid, POINTS FROM (SELECT djid, sum(woot) as POINTS from '
+                + config.database.dbname + '.' + config.database.tablenames.song
+                + ' group by djid order by sum(woot) desc) as test) as rank where '
+                + 'djid  = :id', { id: data.userid },
+                { useArray: true }, function (err,rows) {
+                if (err) {
+                    console.log('Result error: ' + inspect(err));
+                    throw(err);
+                }
+                dbclient.query('SELECT @rank as rank, count(*) as total, sum(woot) as woot, avg(woot) as avgwoot, '
+                    + 'sum(meh) as meh, avg(meh) as avgmeh '
+                    + 'FROM '+ config.database.dbname + '.' + config.database.tablenames.song
+                    + ' WHERE djid = :id', { id: data.userid },
+                    { useArray: true }, function (err, rows) {
+                    if (err) {
                         console.log('Result error: ' + inspect(err));
                         throw(err);
-                    })
-                    res.on('end', function(info) {
-                        dbclient.query('SELECT @rank as rank, count(*) as total, sum(woot) as woot, avg(woot) as avgwoot, '
-                            + 'sum(meh) as meh, avg(meh) as avgmeh '
-                            + 'FROM '+ config.database.dbname + '.' + config.database.tablenames.song
-                            + ' WHERE `djid` LIKE \'' + data.userid + '\'')
-                        .on('result', function(res) {
-                            res.on('row', function(row) {
-                                console.log('Query result:', inspect(row));
-                                var response = (data.name + ', you have played '
-                                    + row.total + ' songs in this room with a total of '
-                                    + row.woot + ' woots and ' + row.meh
-                                    + ' mehs (avg +' + new Number(row.avgwoot).toFixed(1) 
-                                    + '/-' + new Number(row.avgmeh).toFixed(1)
-                                    + ') (Rank: ' + row.rank + ')');
+                    }
+                    console.log('Query result:', inspect(rows[0]));
+                    var response = (data.name + ', you have played '
+                        + rows[0][1] + ' songs in this room with a total of '
+                        + rows[0][2] + ' woots and ' + rows[0][4]
+                        + ' mehs (avg +' + new Number(rows[0][3]).toFixed(1) 
+                        + '/-' + new Number(rows[0][5]).toFixed(1)
+                        + ') (Rank: ' + rows[0][0] + ')');
 
-                                output({text: response, destination: data.source, userid: data.userid});
-                            })
-                            res.on('error', function(err) {
-                                console.log('Result error: ' + inspect(err));
-                                throw(err);
-                            })
-                        })
-                    });
+                    output({text: response, destination: data.source, userid: data.userid});
                 });
             });
         });
