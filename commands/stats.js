@@ -9,44 +9,37 @@ exports.handler = function(data) {
     if (config.database.usedb) {
         dbclient.query('SELECT @uniquesongs := count(*) FROM (select * from '
             + config.database.dbname + '.' + config.database.tablenames.song
-            + ' group by concat(song, \' by \', artist)) as songtbl')
-        .on('result', function(res) {
-            res.on('error', function(err) {
+            + ' group by concat(song, \' by \', artist)) as songtbl', null, { useArray: true }, function(err,rows){
+            if (err) {
                 console.log('Result error: ' + inspect(err));
                 throw(err);
-            })
-            res.on('end', function(info) {
-                dbclient.query('SELECT @numdjs := count(*) FROM (select * from '
-                    + config.database.dbname + '.' + config.database.tablenames.song + ' group by djid) as djtable')
-                .on('result', function(res) {
-                    res.on('error', function(err) {
+            }
+            dbclient.query('SELECT @numdjs := count(*) FROM (select * from '
+                + config.database.dbname + '.' + config.database.tablenames.song + ' group by djid) as djtable',
+                null, { useArray: true }, function(err,rows) {
+                if (err) {
+                    console.log('Result error: ' + inspect(err));
+                    throw(err);
+                }
+                dbclient.query('SELECT @uniquesongs as uniquesongs, @numdjs as numdjs, '
+                    + 'count(*) as total, sum(woot) as woot, avg(woot) as avgwoot, '
+                    + 'sum(meh) as meh, avg(meh) as avgmeh FROM '
+                    + config.database.dbname + '.' + config.database.tablenames.song, null,
+                    { useArray: true }, function(err,rows) {
+                    if (err) {
                         console.log('Result error: ' + inspect(err));
                         throw(err);
-                    })
-                    res.on('end', function(info) {
-                        dbclient.query('SELECT @uniquesongs as uniquesongs, @numdjs as numdjs, '
-                            + 'count(*) as total, sum(woot) as woot, avg(woot) as avgwoot, '
-                            + 'sum(meh) as meh, avg(meh) as avgmeh FROM '
-                            + config.database.dbname + '.' + config.database.tablenames.song)
-                        .on('result', function(res) {
-                            res.on('row', function(row) {
-                                console.log('Query result:', inspect(row));
-                                var response = ('In this room, '
-                                    + row.total + ' songs ('
-                                    + row.uniquesongs + ' unique) have been played by '
-                                    + row.numdjs + ' DJs with a total of '
-                                    + row.woot + ' woots and ' + row.meh
-                                    + ' mehs (avg +' + new Number(row.avgwoot).toFixed(1) 
-                                    + '/-' + new Number(row.avgmeh).toFixed(1)
-                                    + ').');
-                                output({text: response, destination: data.source, userid: data.userid});
-                            })
-                            res.on('error', function(err) {
-                                console.log('Result error: ' + inspect(err));
-                                throw(err);
-                            })
-                        })
-                    });
+                    }
+
+                    var response = 'In this room, '
+                        + rows[0][2] + ' songs ('
+                        + rows[0][0] + ' unique) have been played by '
+                        + rows[0][1] + ' DJs with a total of '
+                        + rows[0][3] + ' woots and ' + rows[0][5]
+                        + ' mehs (avg +' + new Number(rows[0][4]).toFixed(1) 
+                        + '/-' + new Number(rows[0][6]).toFixed(1)
+                        + ').';
+                    output({text: response, destination: data.source, userid: data.userid});
                 });
             });
         });

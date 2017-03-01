@@ -13,7 +13,7 @@ exports.handler = function(data) {
             + ' GROUP BY CONCAT(song,\' by \',artist) ORDER BY SUM '
             + 'DESC LIMIT 3')
         .on('result', function(res) {
-            res.on('row', function(row) {
+            res.on('data', function(row) {
                 response += row.TRACK + ': ' + row.SUM + ' points.  ';
             })
             res.on('end', function(info) {

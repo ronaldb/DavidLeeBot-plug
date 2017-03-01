@@ -1,4 +1,10 @@
+//var PlugAPI = require('./plugapi'); //Use 'npm install plugapi'
 var PlugAPI = require('plugapi'); //Use 'npm install plugapi'
+var airbrake = require('airbrake').createClient(
+	'136739', // project ID
+	'039d13bd33552143fe8a2c722049463a' // Project API key
+);
+airbrake.handleExceptions();
 var UPDATECODE = 'h90';
 
 // Initialize some configuration options, connect databases, etc.
@@ -60,11 +66,11 @@ global.populateSongData = function(data) {
     currentsong.wooted = false;
     currentsong.mehed  = false;
     currentsong.rolled = false;
-    if (data) {
-        if (data.currentDJ) {
+    if (data !== null) {
+        if (data.currentDJ !== null) {
             currentsong.djid   = data.currentDJ.id;
         }
-        if (data.media) {
+        if (data.media !== null && data.media !== undefined) {
             currentsong.artist = data.media.author;
             currentsong.song   = data.media.title;
             currentsong.id     = data.media.cid;
@@ -137,6 +143,11 @@ function initializeModules () {
         }
     }
 
+    if (config.database.usedb) {
+        //Set up database tables
+        setUpDatabase();
+    }
+
     loadCommands(null);
 }
 
@@ -181,8 +192,8 @@ global.setUpDatabase = function() {
 
     //user table
     dbclient.query('CREATE TABLE IF NOT EXISTS ' + config.database.dbname + '.' + config.database.tablenames.user
-        + '(userid VARCHAR(255), '
-        + 'username VARCHAR(255), '
+        + '(userid VARCHAR(128), '
+        + 'username VARCHAR(128), '
         + 'lastseen DATETIME, '
         + 'PRIMARY KEY (userid, username))')
         .on('result', function(res) {
@@ -284,7 +295,7 @@ function loadCommands (data) {
             output({text: response, destination: data.source, userid: data.userid});
         }
     } catch (e) {
-        response = 'Command reload failed: ' + e;
+        response = 'Command reload failed: ' + inspect(e);
         if (data == null) {
             console.log(response);
         }
@@ -297,7 +308,7 @@ function loadCommands (data) {
 function handleCommand (command, text, name, userid, source) {
     for (i in commands) {
         if (commands[i].name == command) {
-            commands[i].handler({name: name, userid: userid, text: text, source: source});
+            commands[i].handler({name: name, userid: userid, text: text, source: source, command: command});
             break;
         }
     }

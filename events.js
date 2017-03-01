@@ -29,7 +29,7 @@ exports.onAdvance = function(data) {
     }
 
     populateSongData(data);
-    myutils.trackStuck();
+//    myutils.trackStuck();
 }
 
 exports.onBan = function(data) {
@@ -254,24 +254,31 @@ exports.onUserJoin = function(data) {
 		console.log("userJoin:", data);
 	}
     if (config.database.usedb) {
+        if (data.username) {
 	    //Add user to user table
-        dbclient.query('INSERT INTO ' + config.database.dbname + '.' + config.database.tablenames.user
-        + ' (userid, username, lastseen)'
-            + 'VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE lastseen = NOW()',
-            [data.id, data.username])
-        .on('result', function(res) {
-        	res.on('error', function(err) {
-                console.log('Result error: ' + inspect(err));
-                throw(err);
-            })
-            res.on('end', function(info) {
-                console.log('User record added successfully');
+            dbclient.query('INSERT INTO ' + config.database.dbname + '.' + config.database.tablenames.user
+                + ' (userid, username, lastseen)'
+                + 'VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE lastseen = NOW()',
+                    [data.id, data.username])
+            .on('result', function(res) {
+                res.on('error', function(err) {
+                    console.log('Result error: ' + inspect(err));
+                    throw(err);
+                })
+                res.on('end', function(info) {
+                    console.log('User record added successfully');
+                });
             });
-        });
+        }
     }
 
     setTimeout(function () {
-    	bot.sendChat('Hello, @' + data.username + '!');
+        if (data.username) {
+    	    bot.sendChat('Hello, @' + data.username + '!');
+        }
+        else {
+            bot.sendChat('Hello, guest!');
+        }
     }, 5000);
 }
 

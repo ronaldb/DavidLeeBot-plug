@@ -1,13 +1,11 @@
 //Displays the list of commands found in ./commands/
 
-exports.name = '.hello';
-exports.hidden = false;
+exports.name = '.merde';
+exports.hidden = true;
 exports.enabled = true;
 exports.matchStart = false;
 exports.handler = function(data) {
-    var response = 'Well hey there, @' + data.name + '!'; 
-    if (data.command == '.bonjour') {
-        response = 'Bonjour à toi, @' + data.name + '!';
-    }
+    var response = 'Surveille ton langage, @' + data.name + '!';
     output({text: response, destination: data.source, userid: data.userid});
 }
+
