@@ -106,7 +106,7 @@ function initializeModules () {
     }
 
     //Creates mariasql db object
-    if (config.database.usedb) {
+    if (config.database.usedb === true) {
         try {
             mariasql = require('mariasql');
         } catch(e) {
@@ -118,7 +118,7 @@ function initializeModules () {
         }
     }
 
-    if (config.database.usedb) {
+    if (config.database.usedb === true) {
         //Connects to mariasql server
         try {
             var dbhost = 'localhost';
@@ -139,13 +139,13 @@ function initializeModules () {
         }
     }
 
-    if (config.database.usedb) {
+    if (config.database.usedb === true) {
         //Set up database tables
         setUpDatabase();
     }
 
     // Create airbrake object
-    if (config.airbrake.use) {
+    if (config.airbrake.use === true) {
         try {
             airbrake = require('airbrake');
         } catch(e) {
@@ -157,7 +157,7 @@ function initializeModules () {
         }
     }
 
-    if (config.airbrake.use) {
+    if (config.airbrake.use === true) {
         airbrakeHandle = airbrake.createClient(config.airbrake.projectID,config.airbrake.APIkey);
         airbrakeHandle.handleExceptions();
     }
@@ -368,8 +368,11 @@ bot.on('chat', function(data) {
     data.fromID = data.raw.uid;
     data.from = data.raw.un;
     
-    if (config.debugmode) {
+    if (config.debugmode === true) {
         console.log('chat:', data);
+    }
+    else {
+        console.log(myutils.timeStamp(),data.message);
     }
 
 

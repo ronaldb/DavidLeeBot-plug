@@ -1,6 +1,6 @@
 {
   "name": "davidleebot-plug",
-  "version": "1.0.0a",
+  "version": "1.0.0b",
   "description": "David Lee Bot is a plug.dj bot, responsible for keeping track of people's played songs.",
   "main": "dlb.js",
   "dependencies": {
