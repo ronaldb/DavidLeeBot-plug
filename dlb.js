@@ -1,10 +1,5 @@
 //var PlugAPI = require('./plugapi'); //Use 'npm install plugapi'
 var PlugAPI = require('plugapi'); //Use 'npm install plugapi'
-var airbrake = require('airbrake').createClient(
-	'136739', // project ID
-	'039d13bd33552143fe8a2c722049463a' // Project API key
-);
-airbrake.handleExceptions();
 var UPDATECODE = 'h90';
 
 // Initialize some configuration options, connect databases, etc.
@@ -21,6 +16,7 @@ global.startDate = new Date();
 global.config;
 global.bot;
 global.dbclient;
+global.airbrakeHandle;
 
 global.currentsong = {
     artist:   null,
@@ -110,7 +106,7 @@ function initializeModules () {
     }
 
     //Creates mariasql db object
-    if (config.database.usedb) {
+    if (config.database.usedb === true) {
         try {
             mariasql = require('mariasql');
         } catch(e) {
@@ -122,7 +118,7 @@ function initializeModules () {
         }
     }
 
-    if (config.database.usedb) {
+    if (config.database.usedb === true) {
         //Connects to mariasql server
         try {
             var dbhost = 'localhost';
@@ -143,9 +139,27 @@ function initializeModules () {
         }
     }
 
-    if (config.database.usedb) {
+    if (config.database.usedb === true) {
         //Set up database tables
         setUpDatabase();
+    }
+
+    // Create airbrake object
+    if (config.airbrake.use === true) {
+        try {
+            airbrake = require('airbrake');
+        } catch(e) {
+            console.log(e);
+            console.log('It is likely that you do not have the airbrake node module installe.'
+                + '\nUse the command \'npm install airbrake\' to install.');
+            console.log('Starting bot without airbrake functionality.');
+            config.airbrake.use = false;
+        }
+    }
+
+    if (config.airbrake.use === true) {
+        airbrakeHandle = airbrake.createClient(config.airbrake.projectID,config.airbrake.APIkey);
+        airbrakeHandle.handleExceptions();
     }
 
     loadCommands(null);
@@ -354,8 +368,11 @@ bot.on('chat', function(data) {
     data.fromID = data.raw.uid;
     data.from = data.raw.un;
     
-    if (config.debugmode) {
+    if (config.debugmode === true) {
         console.log('chat:', data);
+    }
+    else {
+        console.log(myutils.timeStamp(),data.message);
     }
 
 

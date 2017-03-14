@@ -20,4 +20,9 @@
 		"password":"12345",
         "host": "localhost"}
     },
+"airbrake":
+	{"use":false,
+	"projectID":"123456",
+	"APIkey":"0123456789abcdef0123456789abcdef"
+	},
 "debugmode":"false"}
