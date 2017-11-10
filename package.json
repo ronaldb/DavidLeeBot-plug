@@ -6,7 +6,7 @@
   "dependencies": {
     "airbrake": "^1.2.0",
     "mariasql": "^0.2.6",
-    "plugapi": "^4.2.3"
+    "plugapi": "^5.0.0"
   },
   "devDependencies": {},
   "scripts": {
