@@ -4,9 +4,9 @@
   "description": "David Lee Bot is a plug.dj bot, responsible for keeping track of people's played songs.",
   "main": "dlb.js",
   "dependencies": {
-    "airbrake": "^1.2.0",
+    "airbrake": "^2.0.0",
     "mariasql": "^0.2.6",
-    "plugapi": "^4.2.3"
+    "plugapi": "^5.0.0"
   },
   "devDependencies": {},
   "scripts": {
